@@ -145,7 +145,7 @@ export default {
   mounted() {
     Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>

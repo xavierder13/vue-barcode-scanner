@@ -346,7 +346,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "role-edit" });
+                // this.$socket.emit("sendData", { action: "role-edit" });
 
                 Object.assign(this.roles[this.editedIndex], response.data.role);
                 this.showAlert();
@@ -370,7 +370,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "role-create" });
+                // this.$socket.emit("sendData", { action: "role-create" });
                 this.showAlert();
                 this.close();
 
@@ -504,7 +504,7 @@ export default {
     Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
     this.getRole();
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>

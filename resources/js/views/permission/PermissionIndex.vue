@@ -192,7 +192,7 @@ export default {
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
-            this.$socket.emit("sendData", { action: "permission-delete" });
+            // this.$socket.emit("sendData", { action: "permission-delete" });
           }
           this.loading = false;
         },
@@ -270,7 +270,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "permission-edit" });
+                // this.$socket.emit("sendData", { action: "permission-edit" });
 
                 Object.assign(
                   this.permissions[this.editedIndex],
@@ -298,7 +298,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "permission-create" });
+                // this.$socket.emit("sendData", { action: "permission-create" });
 
                 this.showAlert();
                 this.close();
@@ -427,7 +427,7 @@ export default {
     Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
     this.getPermission();
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>

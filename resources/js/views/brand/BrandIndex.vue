@@ -205,7 +205,7 @@ export default {
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
-            this.$socket.emit("sendData", { action: "brand-delete" });
+            // this.$socket.emit("sendData", { action: "brand-delete" });
           }
           this.loading = false;
         },
@@ -283,7 +283,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "brand-edit" });
+                // this.$socket.emit("sendData", { action: "brand-edit" });
 
                 Object.assign(
                   this.brands[this.editedIndex],
@@ -307,7 +307,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "brand-create" });
+                // this.$socket.emit("sendData", { action: "brand-create" });
 
                 this.showAlert();
                 this.close();
@@ -446,7 +446,7 @@ export default {
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>

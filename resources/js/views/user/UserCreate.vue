@@ -237,7 +237,7 @@ export default {
           (response) => {
             if (response.data.success) {
               // send data to Sockot.IO Server
-              this.$socket.emit("sendData", { action: "user-create" });
+              // this.$socket.emit("sendData", { action: "user-create" });
 
               this.showAlert();
               this.clear();
@@ -374,7 +374,7 @@ export default {
     Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
     this.getRole();
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>

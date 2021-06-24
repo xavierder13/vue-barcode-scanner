@@ -22,7 +22,7 @@
             <v-img src="/img/default-profile.png"></v-img>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title>Laravel Socket.IO</v-list-item-title>
+            <v-list-item-title>Inventory</v-list-item-title>
             <v-list-item-subtitle>{{ user }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
@@ -301,7 +301,7 @@ export default {
 
     this.getUser();
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>

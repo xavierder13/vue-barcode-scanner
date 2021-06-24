@@ -6,10 +6,10 @@ import Vuelidate from 'vuelidate';
 import router from './router';
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
-import VueSocketio from 'vue-socket.io';
+// import VueSocketio from 'vue-socket.io';
 import VueBarcodeScanner from 'vue-barcode-scanner'
 
-Vue.use(VueSocketio, 'http://localhost:4000');
+// Vue.use(VueSocketio, 'http://localhost:4000');
 Vue.use(Vuetify);   
 Vue.use(VuetifyMask);
 Vue.use(Vuelidate);

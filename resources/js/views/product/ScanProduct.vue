@@ -189,7 +189,7 @@ export default {
           (response) => {
             if (response.data.success) {
               // send data to Sockot.IO Server
-              this.$socket.emit("sendData", { action: "product-create" });
+              // this.$socket.emit("sendData", { action: "product-create" });
 
               this.showAlert();
               this.clear();
@@ -321,7 +321,7 @@ export default {
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
     this.userRolesPermissions();
-    this.websocket();
+    // this.websocket();
   },
 };
 </script>
