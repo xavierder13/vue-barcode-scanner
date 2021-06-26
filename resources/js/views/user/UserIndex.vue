@@ -143,6 +143,22 @@
                           </v-col>
                         </v-row>
                         <v-row>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
+                            <v-autocomplete
+                              v-model="editedItem.branch_id"
+                              :items="branches"
+                              item-text="name"
+                              item-value="id"
+                              label="Branch"
+                              required
+                              :error-messages="branchErrors"
+                              @input="$v.editedItem.branch_id.$touch()"
+                              @blur="$v.editedItem.branch_id.$touch()"
+                            >
+                            </v-autocomplete>
+                          </v-col>
+                        </v-row>
+                        <v-row>
                           <v-col cols="2" class="mt-0 mb-0 pt-0 pb-0">
                             <v-switch
                               v-model="switch1"
@@ -313,6 +329,7 @@ export default {
     editedItem: {
       name: { required },
       email: { required, email },
+      branch_id: { required },
     },
     password: { required, minLength: minLength(8) },
     confirm_password: { required, sameAsPassword: sameAs("password") },
@@ -347,6 +364,7 @@ export default {
       dialog: false,
       dialogPermission: false,
       users: [],
+      branches: [],
       roles: [],
       roles_permissions: [],
       permissions: Home.data().permissions,
@@ -382,6 +400,7 @@ export default {
         (response) => {
           this.users = response.data.users;
           this.roles = response.data.roles;
+          this.branches = response.data.branches;
           this.loading = false;
         },
         (error) => {
@@ -605,13 +624,9 @@ export default {
 
     getRolesPermissions() {
       this.permissions.user_list = this.hasPermission(["user-list"]);
-      this.permissions.user_create = this.hasPermission([
-        "user-create",
-      ]);
+      this.permissions.user_create = this.hasPermission(["user-create"]);
       this.permissions.user_edit = this.hasPermission(["user-edit"]);
-      this.permissions.user_delete = this.hasPermission([
-        "user-delete",
-      ]);
+      this.permissions.user_delete = this.hasPermission(["user-delete"]);
 
       // hide column actions if user has no permission
       if (!this.permissions.user_edit && !this.permissions.user_delete) {
@@ -626,22 +641,20 @@ export default {
       }
     },
     hasRole(roles) {
-
       let hasRole = false;
 
       roles.forEach((value, index) => {
-          hasRole = this.user_roles.includes(value);
+        hasRole = this.user_roles.includes(value);
       });
 
       return hasRole;
     },
 
     hasPermission(permissions) {
-    
       let hasPermission = false;
 
       permissions.forEach((value, index) => {
-        hasPermission = this.user_permissions.includes(value);       
+        hasPermission = this.user_permissions.includes(value);
       });
 
       return hasPermission;
@@ -726,9 +739,16 @@ export default {
         }
       }
     },
+    branchErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.branch_id.$dirty) return errors;
+      !this.$v.editedItem.branch_id.required && errors.push("Branch is required.");
+      return errors;
+    },
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
+    Axios.defaults.headers.common["Authorization"] =
+      "Bearer " + localStorage.getItem("access_token");
     this.getUser();
 
     this.userRolesPermissions();

@@ -56,8 +56,8 @@
                   :error-messages="passwordErrors"
                   label="Password"
                   required
-                  @input="$v.password.$touch()"
-                  @blur="$v.password.$touch()"
+                  @input="$v.editedItem.password.$touch()"
+                  @blur="$v.editedItem.password.$touch()"
                   type="password"
                   :readonly="editedItem.id == 1 ? true : false"
                 ></v-text-field>
@@ -71,8 +71,8 @@
                   :error-messages="confirm_passwordErrors"
                   label="Confirm Password"
                   required
-                  @input="$v.confirm_password.$touch()"
-                  @blur="$v.confirm_password.$touch()"
+                  @input="$v.editedItem.confirm_password.$touch()"
+                  @blur="$v.editedItem.confirm_password.$touch()"
                   type="password"
                 ></v-text-field>
               </v-col>
@@ -98,6 +98,22 @@
                       {{ data.item.name }}
                     </v-chip>
                   </template>
+                </v-autocomplete>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                <v-autocomplete
+                  v-model="editedItem.branch_id"
+                  :items="branches"
+                  item-text="name"
+                  item-value="id"
+                  label="Branch"
+                  required
+                  :error-messages="branchErrors"
+                  @input="$v.editedItem.branch_id.$touch()"
+                  @blur="$v.editedItem.branch_id.$touch()"
+                >
                 </v-autocomplete>
               </v-col>
             </v-row>
@@ -153,6 +169,7 @@ export default {
       email: { required, email },
       password: { required, minLength: minLength(8) },
       confirm_password: { required, sameAsPassword: sameAs("password") },
+      branch_id: { required },
     },
   },
   data() {
@@ -173,6 +190,7 @@ export default {
       switch1: true,
       disabled: false,
       users: [],
+      branches: [],
       roles: [],
       roles_permissions: [],
       permissions: Home.data().permissions,
@@ -184,6 +202,7 @@ export default {
         confirm_password: "",
         roles: [],
         active: "Y",
+        branch_id: "",
       },
       defaultItem: {
         name: "",
@@ -192,6 +211,7 @@ export default {
         confirm_password: "",
         roles: [],
         active: "Y",
+        branch_id: "",
       },
       permissions: Home.data().permissions,
       user_permissions: [],
@@ -204,6 +224,7 @@ export default {
       Axios.get("/api/user/create").then(
         (response) => {
           this.roles = response.data.roles;
+          this.branches = response.data.branches;
         },
         (error) => {
           this.isUnauthorized(error);
@@ -227,9 +248,6 @@ export default {
       if (!this.$v.$error) {
         this.disabled = true;
         this.overlay = true;
-
-        this.editedItem.password = this.password;
-        this.editedItem.confirm_password = this.confirm_password;
 
         const data = this.editedItem;
 
@@ -353,7 +371,7 @@ export default {
     confirm_passwordErrors() {
       const errors = [];
       if (!this.$v.editedItem.confirm_password.$dirty) return errors;
-      !this.$v.confirm_password.required &&
+      !this.$v.editedItem.confirm_password.required &&
         errors.push("Password Confirmation is required.");
       !this.$v.editedItem.confirm_password.sameAsPassword &&
         errors.push("Passwords did not match");
@@ -368,6 +386,12 @@ export default {
         this.editedItem.active = "N";
         return " Inactive";
       }
+    },
+    branchErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.branch_id.$dirty) return errors;
+      !this.$v.editedItem.branch_id.required && errors.push("Branch is required.");
+      return errors;
     },
   },
   mounted() {

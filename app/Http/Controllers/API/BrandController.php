@@ -106,7 +106,7 @@ class BrandController extends Controller
     public function delete(Request $request)
     {   
         $brand_id = $request->get('brand_id');
-        $brand = Permission::find($brand_id);
+        $brand = Brand::find($brand_id);
         
         //if record is empty then display error page
         if(empty($brand->id))

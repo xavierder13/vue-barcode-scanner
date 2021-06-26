@@ -12,6 +12,7 @@ use Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\User;
+use App\Branch;
 use Spatie\Activitylog\Models\Activity;
 
 
@@ -21,15 +22,15 @@ class UserController extends Controller
     {   
         $users = User::with('roles')->with('roles.permissions')->get();
         $roles = Role::with('permissions')->orderBy('id', 'Asc')->get();
-
-        return response()->json(['users' => $users, 'roles' => $roles], 200);
+        $branches = Branch::all();
+        return response()->json(['users' => $users, 'roles' => $roles, 'branches' => $branches], 200);
     }
 
     public function create() 
     {
         $roles = Role::with('permissions')->orderBy('id', 'Asc')->get();
-
-        return response()->json(['roles' => $roles], 200);
+        $branches = Branch::all();
+        return response()->json(['roles' => $roles, 'branches' => $branches], 200);
     }
 
     public function store(Request $request)
@@ -44,6 +45,8 @@ class UserController extends Controller
             'username.unique' => 'Username already exists',
             'password.min' => 'Password must be atleast 8 characters',
             'password.same' => 'Password and Confirm Password did not match',
+            'branch_id.required' => 'Branch is required',
+            'branch_id.integer' => 'Branch must be an integer',
         ];
 
         $valid_fields = [
@@ -51,6 +54,7 @@ class UserController extends Controller
             // 'email' => 'string|email|max:255',
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8|same:confirm_password',
+            'branch_id' => 'required|integer',
         ];
 
         $validator = Validator::make($request->all(), $valid_fields, $rules);
@@ -64,6 +68,7 @@ class UserController extends Controller
         $user->name = $request->get('name');
         $user->email = $request->get('email');
         $user->password = Hash::make($request->get('password'));
+        $user->branch_id = $request->get('branch_id');
         $user->active = $request->get('active');
         $user->save();
 
@@ -101,10 +106,13 @@ class UserController extends Controller
 
         $rules = [
             'name.required' => 'Please enter name',
+            'branch_id.required' => 'Branch is required',
+            'branch_id.integer' => 'Branch must be an integer',
         ];
 
         $valid_fields = [
             'name' => 'required|string|max:255',
+            'branch_id' => 'required|integer',
         ];
 
         if(!empty($request->get('password')))
@@ -133,6 +141,7 @@ class UserController extends Controller
         {
             $user->password = Hash::make($request->get('password'));
         }
+        $user->branch_id = $request->get('branch_id');
         $user->active = $request->get('active');
 
         $user->save();

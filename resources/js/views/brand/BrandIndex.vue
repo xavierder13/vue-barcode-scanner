@@ -409,14 +409,6 @@ export default {
         ) {
           this.userRolesPermissions();
         }
-
-        if (
-          action == "permission-create" ||
-          action == "permission-edit" ||
-          action == "permission-delete"
-        ) {
-          this.getBrand();
-        }
       };
     },
   },
@@ -428,7 +420,7 @@ export default {
       const errors = [];
       if (!this.$v.editedBrand.name.$dirty) return errors;
       !this.$v.editedBrand.name.required &&
-        errors.push("Permission is required.");
+        errors.push("Brand is required.");
       return errors;
     },
     activeStatus() {

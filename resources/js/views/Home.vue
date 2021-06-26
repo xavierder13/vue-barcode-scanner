@@ -87,6 +87,8 @@
           v-if="
             permissions.brand_list ||
             permissions.brand_create ||
+            permissions.branch_list ||
+            permissions.branch_create ||
             permissions.role_list ||
             permissions.role_create ||
             permissions.permission_list ||
@@ -105,6 +107,11 @@
           <v-list-item link to="/brand/index">
             <v-list-item-content>
               <v-list-item-title>Brand</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item link to="/branch/index">
+            <v-list-item-content>
+              <v-list-item-title>Branch</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
           <v-list-item link to="/role/index" v-if="permissions.role_list">
@@ -170,6 +177,10 @@ export default {
         brand_create: false,
         brand_edit: false,
         brand_delete: false,
+        branch_list: false,
+        branch_create: false,
+        branch_edit: false,
+        branch_delete: false,
         role_list: false,
         role_create: false,
         role_edit: false,

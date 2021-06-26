@@ -201,6 +201,35 @@ Route::group(['prefix' => 'brand', 'middleware' => ['auth:api', 'brand.maintenan
 
 });
 
+// Branch Routes
+Route::group(['prefix' => 'branch', 'middleware' => ['auth:api', 'branch.maintenance']], function(){
+    Route::get('/index', [
+        'uses' => 'API\BranchController@index',
+        'as' => 'branch.index',
+    ]);
+    Route::get('/create', [
+        'uses' => 'API\BranchController@create',
+        'as' => 'branch.create',
+    ]);
+    Route::post('/store', [
+        'uses' => 'API\BranchController@store',
+        'as' => 'branch.store',
+    ]);
+    Route::post('/edit', [
+        'uses' => 'API\BranchController@edit',
+        'as' => 'branch.edit',
+    ]);
+    Route::post('/update/{id}', [
+        'uses' => 'API\BranchController@update',
+        'as' => 'branch.update',
+    ]);
+    Route::post('/delete', [
+        'uses' => 'API\BranchController@delete',
+        'as' => 'branch.delete',
+    ]);
+
+});
+
 //Activity Logs
 Route::group(['prefix' => 'activity_logs', 'middleware' => ['auth:api', 'activity.logs']], function(){
     Route::get('/index', [
