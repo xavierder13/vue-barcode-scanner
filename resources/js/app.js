@@ -14,7 +14,10 @@ Vue.use(Vuetify);
 Vue.use(VuetifyMask);
 Vue.use(Vuelidate);
 Vue.use(VueSweetalert2);
-Vue.use(VueBarcodeScanner)
+   
+Vue.use(VueBarcodeScanner, {
+    sensitivity: 300 // default is 100
+})
 
 const app = new Vue({
     vuetify: Vuetify,

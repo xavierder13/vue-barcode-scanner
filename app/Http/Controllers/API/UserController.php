@@ -167,8 +167,6 @@ class UserController extends Controller
 
         $user_permissions = $user->getAllPermissions()->pluck('name');
 
-        
-
         return response()->json([
             'success' => 'Record has been updated', 
             'user_roles' => $user_roles, 
