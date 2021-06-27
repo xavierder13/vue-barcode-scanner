@@ -2,16 +2,16 @@
   <div class="flex column">
     <div id="_wrapper" class="pa-5">
       <v-main>
-        <v-breadcrumbs :items="items">
+        <!-- <v-breadcrumbs :items="items">
           <template v-slot:item="{ item }">
             <v-breadcrumbs-item :to="item.link" :disabled="item.disabled">
               {{ item.text.toUpperCase() }}
             </v-breadcrumbs-item>
           </template>
-        </v-breadcrumbs>
+        </v-breadcrumbs> -->
         <v-card>
           <v-card-title>
-            Permission Lists
+            Product Lists
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
@@ -19,7 +19,7 @@
               label="Search"
               single-line
               hide-details
-              v-if="userPermissions.permission_list"
+         
             ></v-text-field>
             <template>
               <v-toolbar flat>
@@ -30,7 +30,6 @@
                   dark
                   class="mb-2"
                   @click="clear() + (dialog = true)"
-                  v-if="userPermissions.permission_create"
                 >
                   <v-icon>mdi-plus</v-icon>
                 </v-btn>
@@ -43,16 +42,46 @@
                     <v-card-text>
                       <v-container>
                         <v-row>
-                          <v-col>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
                             <v-text-field
-                              name="permission"
-                              v-model="editedPermission.name"
-                              label="Permission"
+                              name="serial"
+                              label="Serial"
+                              v-model="editedItem.serial"
+                              readonly
                               required
-                              :error-messages="permissionErrors"
-                              @input="$v.editedPermission.name.$touch()"
-                              @blur="$v.editedPermission.name.$touch()"
+                              :error-messages="serialErrors"
+                              @input="$v.editedItem.serial.$touch()"
+                              @blur="$v.editedItem.serial.$touch()"
                             ></v-text-field>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
+                            <v-text-field
+                              name="model"
+                              label="Model"
+                              v-model="editedItem.model"
+                              required
+                              :error-messages="modelErrors"
+                              @input="$v.editedItem.model.$touch()"
+                              @blur="$v.editedItem.model.$touch()"
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
+                            <v-autocomplete
+                              v-model="editedItem.brand_id"
+                              :items="brands"
+                              item-text="name"
+                              item-value="id"
+                              label="Brand"
+                              required
+                              :error-messages="brandErrors"
+                              @input="$v.editedItem.brand_id.$touch()"
+                              @blur="$v.editedItem.brand_id.$touch()"
+                            >
+                            </v-autocomplete>
                           </v-col>
                         </v-row>
                       </v-container>
@@ -79,19 +108,22 @@
           </v-card-title>
           <v-data-table
             :headers="headers"
-            :items="permissions"
+            :items="products"
             :search="search"
             :loading="loading"
             loading-text="Loading... Please wait"
-            v-if="userPermissions.permission_list"
+            v-if="userPermissions.product_list"
           >
+            <template v-slot:item.brand="{ item }">
+              {{ item.brand.name }}
+            </template>
             <template v-slot:item.actions="{ item }">
               <v-icon
                 small
                 class="mr-2"
                 color="green"
-                @click="editPermission(item)"
-                v-if="userPermissions.permission_edit"
+                @click="editProduct(item)"
+                v-if="userPermissions.product_edit"
               >
                 mdi-pencil
               </v-icon>
@@ -99,7 +131,7 @@
                 small
                 color="red"
                 @click="showConfirmAlert(item)"
-                v-if="userPermissions.permission_delete"
+                v-if="userPermissions.product_delete"
               >
                 mdi-delete
               </v-icon>
@@ -126,37 +158,48 @@ export default {
   mixins: [validationMixin],
 
   validations: {
-    editedPermission: {
-      name: { required },
+    editedItem: {
+      brand_id: { required },
+      model: { required },
+      serial: { required },
     },
   },
   data() {
     return {
       search: "",
       headers: [
-        { text: "Permission", value: "name" },
+        { text: "Brand", value: "brand" },
+        { text: "Model", value: "model" },
+        { text: "Serial", value: "serial" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       disabled: false,
       dialog: false,
-      permissions: [],
+      products: [],
+      brands: [],
       userPermissions: Home.data().permissions,
       editedIndex: -1,
-      editedPermission: {
-        name: "",
+      editedItem: {
+        brand: "",
+        brand_id: "",
+        model: "",
+        serial: "",
       },
       defaultItem: {
-        name: "",
+        brand: "",
+        brand_id: "",
+        model: "",
+        serial: "",
       },
       items: [
         {
           text: "Home",
           disabled: false,
-          link: "/dashboard",
+          link: "/product/index",
         },
         {
-          text: "Permission Lists",
-          disabled: true,
+          text: "Product Lists",
+          disabled: false,
         },
       ],
       loading: true,
@@ -168,9 +211,10 @@ export default {
   methods: {
     getProduct() {
       this.loading = true;
-      Axios.get("/api/permission/index").then(
+      Axios.get("/api/product/index").then(
         (response) => {
-          this.permissions = response.data.permissions;
+          this.products = response.data.products;
+          this.brands = response.data.brands;
           this.loading = false;
         },
         (error) => {
@@ -179,20 +223,20 @@ export default {
       );
     },
 
-    editPermission(item) {
-      this.editedIndex = this.permissions.indexOf(item);
-      this.editedPermission = Object.assign({}, item);
+    editProduct(item) {
+      this.editedIndex = this.products.indexOf(item);
+      this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
-    deletePermission(permissionid) {
-      const data = { permissionid: permissionid };
+    deleteProduct(product_id) {
+      const data = { product_id: product_id };
       this.loading = true;
-      Axios.post("/api/permission/delete", data).then(
+      Axios.post("/api/product/delete", data).then(
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
-            // this.$socket.emit("sendData", { action: "permission-delete" });
+            // this.$socket.emit("sendData", { action: "product-delete" });
           }
           this.loading = false;
         },
@@ -227,14 +271,14 @@ export default {
         if (result.value) {
           // <-- if confirmed
 
-          const permissionid = item.id;
-          const index = this.permissions.indexOf(item);
+          const product_id = item.id;
+          const index = this.products.indexOf(item);
 
           //Call delete Product function
-          this.deletePermission(permissionid);
+          this.deleteProduct(product_id);
 
-          //Remove item from array permissions
-          this.permissions.splice(index, 1);
+          //Remove item from array products
+          this.products.splice(index, 1);
 
           this.$swal({
             position: "center",
@@ -251,7 +295,7 @@ export default {
       this.dialog = false;
       this.clear();
       this.$nextTick(() => {
-        this.editedPermission = Object.assign({}, this.defaultItem);
+        this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
     },
@@ -263,25 +307,21 @@ export default {
         this.disabled = true;
 
         if (this.editedIndex > -1) {
-          const data = this.editedPermission;
-          const permissionid = this.editedPermission.id;
+          const data = this.editedItem;
+          const product_id = this.editedItem.id;
 
-          Axios.post("/api/permission/update/" + permissionid, data).then(
+          Axios.post("/api/product/update/" + product_id, data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                // this.$socket.emit("sendData", { action: "permission-edit" });
+                // this.$socket.emit("sendData", { action: "product-edit" });
 
                 Object.assign(
-                  this.permissions[this.editedIndex],
-                  this.editedPermission
+                  this.products[this.editedIndex],
+                  this.editedItem
                 );
                 this.showAlert();
                 this.close();
-
-                this.user_permissions = response.data.user_permissions;
-                this.user_roles = response.data.user_roles;
-                this.getRolesPermissions();
               }
 
               this.disabled = false;
@@ -292,19 +332,19 @@ export default {
             }
           );
         } else {
-          const data = this.editedPermission;
+          const data = this.editedItem;
 
-          Axios.post("/api/permission/store", data).then(
+          Axios.post("/api/product/store", data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                // this.$socket.emit("sendData", { action: "permission-create" });
+                // this.$socket.emit("sendData", { action: "product-create" });
 
                 this.showAlert();
                 this.close();
 
                 //push recently added data from database
-                this.permissions.push(response.data.permission);
+                this.products.push(response.data.product);
               }
               this.disabled = false;
             },
@@ -319,7 +359,7 @@ export default {
 
     clear() {
       this.$v.$reset();
-      this.editedPermission.name = "";
+      this.editedItem = Object.assign({}, this.defaultItem);
     },
     userRolesPermissions() {
       Axios.get("api/user/roles_permissions").then((response) => {
@@ -337,33 +377,32 @@ export default {
     },
 
     getRolesPermissions() {
-      this.userPermissions.permission_list = this.hasPermission([
-        "permission-list",
+      this.userPermissions.product_list = this.hasPermission([
+        "product-list",
       ]);
-      this.userPermissions.permission_create = this.hasPermission([
-        "permission-create",
+      this.userPermissions.product_create = this.hasPermission([
+        "product-create",
       ]);
-      this.userPermissions.permission_edit = this.hasPermission([
-        "permission-edit",
+      this.userPermissions.product_edit = this.hasPermission([
+        "product-edit",
       ]);
-      this.userPermissions.permission_delete = this.hasPermission([
-        "permission-delete",
+      this.userPermissions.product_delete = this.hasPermission([
+        "product-delete",
       ]);
 
-      // hide column actions if user has no permission
-      if (
-        !this.userPermissions.permission_edit &&
-        !this.userPermissions.permission_delete
-      ) {
-        this.headers[1].align = " d-none";
-      } else {
-        this.headers[1].align = "";
-      }
+      // // hide column actions if user has no permission
+      // if (
+      //   !this.userPermissions.product_edit &&
+      //   !this.userPermissions.product_delete
+      // ) {
+      //   this.headers[1].align = " d-none";
+      // } else {
+      //   this.headers[1].align = "";
+      // }
 
       // if user is not authorize
       if (
-        !this.userPermissions.permission_list &&
-        !this.userPermissions.permission_create
+        !this.userPermissions.product_list
       ) {
         this.$router.push("/unauthorize").catch(() => {});
       }
@@ -401,32 +440,58 @@ export default {
           this.userRolesPermissions();
         }
 
-        if (
-          action == "permission-create" ||
-          action == "permission-edit" ||
-          action == "permission-delete"
-        ) {
-          this.getProduct();
-        }
+    
       };
+    },
+    // Create callback function to receive barcode when the scanner is already done
+    onBarcodeScanned(barcode) {
+      // console.log(barcode);
+      this.editedItem.serial = barcode;
+      // do something...
+    },
+    // Reset to the last barcode before hitting enter (whatever anything in the input box)
+    resetBarcode() {
+      let barcode = this.$barcodeScanner.getPreviousCode();
+      // do something...
     },
   },
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Permission" : "Edit Permission";
+      return this.editedIndex === -1 ? "New Product" : "Edit Product";
     },
-    permissionErrors() {
+    brandErrors() {
       const errors = [];
-      if (!this.$v.editedPermission.name.$dirty) return errors;
-      !this.$v.editedPermission.name.required &&
-        errors.push("Permission is required.");
+      if (!this.$v.editedItem.brand_id.$dirty) return errors;
+      !this.$v.editedItem.brand_id.required && errors.push("Brand is required.");
+      return errors;
+    },
+    modelErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.model.$dirty) return errors;
+      !this.$v.editedItem.model.required && errors.push("Model is required.");
+      return errors;
+    },
+    serialErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.serial.$dirty) return errors;
+      !this.$v.editedItem.serial.required && errors.push("Serial is required.");
       return errors;
     },
   },
+  created() {
+    // Add barcode scan listener and pass the callback function
+    this.$barcodeScanner.init(this.onBarcodeScanned);
+  },
+  destroyed() {
+    // Remove listener when component is destroyed
+    this.$barcodeScanner.destroy();
+  },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
+    Axios.defaults.headers.common["Authorization"] =
+      "Bearer " + localStorage.getItem("access_token");
     this.getProduct();
     this.userRolesPermissions();
+    this.$barcodeScanner.init(this.onBarcodeScanned);
     // this.websocket();
   },
 };

@@ -271,6 +271,9 @@
                 </v-chip>
               </span>
             </template>
+            <template v-slot:item.branch="{ item }">
+              {{ item.branch.name }}
+            </template>
             <template v-slot:item.actions="{ item }">
               <v-icon
                 small
@@ -354,6 +357,7 @@ export default {
         { text: "Full Name", value: "name" },
         { text: "E-mail", value: "email" },
         { text: "Active", value: "active" },
+        { text: "Branch", value: "branch" },
         { text: "Last Login", value: "last_login" },
         { text: "Roles", value: "roles" },
         { text: "Actions", value: "actions", sortable: false },
@@ -556,7 +560,7 @@ export default {
 
                 this.showAlert();
                 this.close();
-
+       
                 //push recently added data from database
                 this.users.push(response.data.user);
               }

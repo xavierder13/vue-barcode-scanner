@@ -20,7 +20,10 @@ class UserController extends Controller
 {
     public function index()
     {   
-        $users = User::with('roles')->with('roles.permissions')->get();
+        $users = User::with('roles')
+                     ->with('roles.permissions')
+                     ->with('branch')
+                     ->get();
         $roles = Role::with('permissions')->orderBy('id', 'Asc')->get();
         $branches = Branch::all();
         return response()->json(['users' => $users, 'roles' => $roles, 'branches' => $branches], 200);
@@ -73,6 +76,11 @@ class UserController extends Controller
         $user->save();
 
         $user->assignRole($request->get('roles'));
+
+        $user = User::with('roles')
+                    ->with('roles.permissions')
+                    ->with('branch')
+                    ->where('id', '=', $user->id)->first();
 
         return response()->json(['success' => 'Record has successfully added', 'user' => $user], 200);
     }
@@ -149,16 +157,23 @@ class UserController extends Controller
         DB::table('model_has_roles')->where('model_id', $user_id)->delete();
         
         $user->assignRole($request->get('roles'));
+
+        $user = User::with('roles')
+                    ->with('roles.permissions')
+                    ->with('branch')
+                    ->where('id', '=', $user_id)->first();
         
         $user_roles = $user->roles->pluck('name')->all();
 
         $user_permissions = $user->getAllPermissions()->pluck('name');
 
+        
+
         return response()->json([
             'success' => 'Record has been updated', 
             'user_roles' => $user_roles, 
             'user_permissions' => $user_permissions,
-            'user' => User::with('roles')->where('id', '=', $user_id)->first()
+            'user' => $user
         ], 200);
     }
 

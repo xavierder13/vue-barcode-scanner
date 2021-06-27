@@ -2,7 +2,7 @@
   <v-app>
     <!-- Navbar -->
     <v-app-bar dense dark app>
-      <v-btn icon @click.stop="mini = !mini">
+      <v-btn icon @click.stop="drawer = !drawer">
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
       </v-btn>
 
@@ -15,7 +15,7 @@
     </v-app-bar>
 
     <!-- Sidebar -->
-    <v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" dark app>
+    <v-navigation-drawer v-model="drawer" dark app>
       <v-list>
         <v-list-item class="px-2">
           <v-list-item-avatar class="rounded-5" height="60" width="60">
@@ -31,12 +31,12 @@
       <v-divider></v-divider>
 
       <v-list>
-        <v-list-item link to="/dashboard">
+        <!-- <v-list-item link to="/dashboard">
           <v-list-item-icon>
             <v-icon>mdi-view-dashboard</v-icon>
           </v-list-item-icon>
           <v-list-item-title>Dashboard</v-list-item-title>
-        </v-list-item>
+        </v-list-item> -->
         <v-list-group
           no-action
           v-if="permissions.user_list || permissions.user_create"
@@ -181,6 +181,10 @@ export default {
         branch_create: false,
         branch_edit: false,
         branch_delete: false,
+        product_list: false,
+        product_create: false,
+        product_edit: false,
+        product_delete: false,
         role_list: false,
         role_create: false,
         role_edit: false,

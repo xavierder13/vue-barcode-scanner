@@ -24,7 +24,7 @@
           <v-divider></v-divider>
           <v-card-text class="ml-4">
             <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
                 <v-text-field
                   name="serial"
                   label="Serial"
@@ -38,7 +38,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
                 <v-text-field
                   name="model"
                   label="Model"
@@ -51,7 +51,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
                 <v-autocomplete
                   v-model="editedItem.brand_id"
                   :items="brands"
@@ -77,7 +77,7 @@
             >
               Save
             </v-btn>
-            <v-btn color="#E0E0E0" to="/dashboard" class="mb-4"> Cancel </v-btn>
+            <v-btn color="#E0E0E0" to="/product/index" class="mb-4"> Cancel </v-btn>
           </v-card-actions>
         </v-card>
       </v-main>
@@ -122,7 +122,7 @@ export default {
         {
           text: "Home",
           disabled: false,
-          link: "/dashboard",
+          link: "/product/index",
         },
         {
           text: "Create User",
@@ -180,9 +180,6 @@ export default {
         this.disabled = true;
         this.overlay = true;
 
-        this.editedItem.password = this.password;
-        this.editedItem.confirm_password = this.confirm_password;
-
         const data = this.editedItem;
 
         Axios.post("/api/product/store", data).then(
@@ -194,8 +191,6 @@ export default {
               this.showAlert();
               this.clear();
 
-              //push recently added data from database
-              this.users.push(response.data.user);
             }
             this.overlay = false;
             this.disabled = false;
@@ -278,7 +273,7 @@ export default {
     },
     // Create callback function to receive barcode when the scanner is already done
     onBarcodeScanned(barcode) {
-      console.log(barcode);
+      // console.log(barcode);
       this.editedItem.serial = barcode;
       // do something...
     },
@@ -321,6 +316,7 @@ export default {
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
     this.userRolesPermissions();
+    this.$barcodeScanner.init(this.onBarcodeScanned);
     // this.websocket();
   },
 };

@@ -47,5 +47,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function branch()
+    {
+        return $this->hasOne('App\Branch', 'id', 'branch_id');
+        //                 ( <Model>, <id_of_specified_Model>, <id_of_this_model> )
+    }
  
 }
