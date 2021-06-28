@@ -112,7 +112,17 @@ Route::group(['prefix' => 'product', 'middleware' => ['auth:api', 'product.maint
         'as' => 'product.delete',
     ]);
 
+    Route::get('/export', [
+        'uses' => 'API\ProductController@export',
+        'as' => 'product.export',
+    ]);
+
 });
+
+Route::get('/product/export', [
+    'uses' => 'API\ProductController@export',
+    'as' => 'product.export',
+]);
 
 //Permissions
 Route::group(['prefix' => 'permission', 'middleware' => ['auth:api', 'permission.maintenance']], function(){

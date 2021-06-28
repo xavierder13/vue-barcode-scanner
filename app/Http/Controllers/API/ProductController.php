@@ -6,31 +6,63 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Product;
 use App\Brand;
+use App\Branch;
 use DB;
 use Validator;
+use Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProductsExport;
 
 class ProductController extends Controller
 {
     public function index()
     {   
-        $products = Product::with('brand')->get();
+        $user = Auth::user();
+
+        $products = Product::with('brand')
+                           ->with('branch')
+                           ->with('user')
+                           ->get();
+
+        // if auth is not admin then filter per branch
+        if($user->id !== 1)
+        {
+            $products = Product::with('brand')
+                               ->with('branch')
+                               ->with('user')
+                               ->where('branch_id' ,'=' ,$user->branch_id )
+                               ->get();
+        }
 
         $brands = Brand::all();
-
-        return response()->json(['products' => $products, 'brands' => $brands], 200);
+        $branches = Branch::all();
+        
+        return response()->json([
+            'products' => $products, 
+            'brands' => $brands,
+            'branches' => $branches,
+            'user' => $user,
+        ], 200);
     }
 
     public function create()
-    {
+    {   
+        $user = Auth::user();
         $brands = Brand::all();
+        $branches = Branch::all();
 
-        return response()->json(['brands' => $brands], 200);
+        return response()->json([
+            'brands' => $brands,
+            'branches' => $branches,
+            'user' => $user,
+        ], 200);
     }
 
     public function store(Request $request)
     {
         
         $rules = [
+            'branch_id.integer' => 'Branch must be an integer',
             'brand_id.required' => 'Brand is required',
             'brand_id.integer' => 'Brand must be an integer',
             'model.required' => 'Model is required',
@@ -38,6 +70,7 @@ class ProductController extends Controller
         ];
 
         $valid_fields = [
+            'branch_id' => 'nullable|integer',
             'brand_id' => 'required|integer',
             'model' => 'required',
             'serial' => 'required',
@@ -50,7 +83,18 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 200);
         }
 
+        $user = Auth::user();
+        $branch_id = $request->get('branch_id');
+
+        // if auth is not admin then filter per branch
+        if($user->id !== 1)
+        {
+            $branch_id = $user->branch_id;
+        }
+
         $product = new Product();
+        $product->user_id = $user->id;
+        $product->branch_id = $branch_id;
         $product->brand_id = $request->get('brand_id');
         $product->model = $request->get('model');
         $product->serial = $request->get('serial');
@@ -58,6 +102,8 @@ class ProductController extends Controller
         $product->save();
 
         $product = Product::with('brand')
+                          ->with('branch')
+                          ->with('user')
                           ->where('id', '=', $product->id)
                           ->first();
 
@@ -104,7 +150,17 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 200);
         }
 
+        $user = Auth::user();
+        $branch_id = $request->get('branch_id');
+
+        // if auth is not admin then filter per branch
+        if($user->id !== 1)
+        {
+            $branch_id = $user->branch_id;
+        }
+
         $product = Product::find($product_id);
+        $product->branch_id = $branch_id;
         $product->brand_id = $request->get('brand_id');
         $product->model = $request->get('model');
         $product->serial = $request->get('serial');
@@ -112,6 +168,8 @@ class ProductController extends Controller
         $product->save();
 
         $product = Product::with('brand')
+                          ->with('branch')
+                          ->with('user')
                           ->where('id', '=', $product_id)
                           ->first();
 
@@ -131,5 +189,11 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json(['success' => 'Record has been deleted'], 200);
+    }
+
+
+    public function export()
+    {
+        return Excel::download(new ProductsExport, 'products.xls');
     }
 }

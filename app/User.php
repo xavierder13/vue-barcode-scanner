@@ -15,7 +15,14 @@ class User extends Authenticatable
     use HasApiTokens, Notifiable, HasRoles, LogsActivity;
 
     /* Start - Activity Logs */
-    protected static $logAttributes = ['name', 'active', 'password', 'branch_id'];
+    protected static $logAttributes = [
+        'name', 
+        'active', 
+        'password', 
+        'user_id',
+        'branch_id',
+        'brand_id'
+    ];
     protected static $logOnlyDirty = true;
     protected static $submitEmptyLogs = false;
     protected static $logName = 'users';

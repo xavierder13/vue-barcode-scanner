@@ -12,6 +12,10 @@
         <v-card>
           <v-card-title>
             Product Lists
+            <v-btn color="success" class="ml-4" small @click="exportData()"
+              ><v-icon class="mr-1" small> mdi-microsoft-excel </v-icon
+              >Export</v-btn
+            >
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
@@ -19,7 +23,6 @@
               label="Search"
               single-line
               hide-details
-         
             ></v-text-field>
             <template>
               <v-toolbar flat>
@@ -84,6 +87,23 @@
                             </v-autocomplete>
                           </v-col>
                         </v-row>
+                        <v-row>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
+                            <v-autocomplete
+                              v-model="editedItem.branch_id"
+                              :items="branches"
+                              item-text="name"
+                              item-value="id"
+                              label="Branch"
+                              required
+                              :error-messages="branchErrors"
+                              @input="$v.editedItem.branch_id.$touch()"
+                              @blur="$v.editedItem.branch_id.$touch()"
+                              v-if="user.id === 1"
+                            >
+                            </v-autocomplete>
+                          </v-col>
+                        </v-row>
                       </v-container>
                     </v-card-text>
 
@@ -116,6 +136,9 @@
           >
             <template v-slot:item.brand="{ item }">
               {{ item.brand.name }}
+            </template>
+            <template v-slot:item.branch="{ item }">
+              {{ item.branch.name }}
             </template>
             <template v-slot:item.actions="{ item }">
               <v-icon
@@ -159,6 +182,7 @@ export default {
 
   validations: {
     editedItem: {
+      branch_id: { required },
       brand_id: { required },
       model: { required },
       serial: { required },
@@ -171,21 +195,25 @@ export default {
         { text: "Brand", value: "brand" },
         { text: "Model", value: "model" },
         { text: "Serial", value: "serial" },
+        { text: "Branch", value: "branch" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       disabled: false,
       dialog: false,
       products: [],
       brands: [],
+      branches: [],
       userPermissions: Home.data().permissions,
       editedIndex: -1,
       editedItem: {
+        branch_id: "",
         brand: "",
         brand_id: "",
         model: "",
         serial: "",
       },
       defaultItem: {
+        branch_id: "",
         brand: "",
         brand_id: "",
         model: "",
@@ -205,6 +233,7 @@ export default {
       loading: true,
       user_permissions: [],
       user_roles: [],
+      user: "",
     };
   },
 
@@ -215,6 +244,9 @@ export default {
         (response) => {
           this.products = response.data.products;
           this.brands = response.data.brands;
+          this.branches = response.data.branches;
+          this.editedItem.branch_id = response.data.user.branch_id;
+          this.user = response.data.user;
           this.loading = false;
         },
         (error) => {
@@ -316,10 +348,7 @@ export default {
                 // send data to Sockot.IO Server
                 // this.$socket.emit("sendData", { action: "product-edit" });
 
-                Object.assign(
-                  this.products[this.editedIndex],
-                  this.editedItem
-                );
+                Object.assign(this.products[this.editedIndex], this.editedItem);
                 this.showAlert();
                 this.close();
               }
@@ -375,17 +404,21 @@ export default {
         this.$router.push({ name: "unauthorize" });
       }
     },
+    exportData()
+    {
+      window.open(
+        location.origin +
+          "/api/product/export",
+        "_blank"
+      );
+    },
 
     getRolesPermissions() {
-      this.userPermissions.product_list = this.hasPermission([
-        "product-list",
-      ]);
+      this.userPermissions.product_list = this.hasPermission(["product-list"]);
       this.userPermissions.product_create = this.hasPermission([
         "product-create",
       ]);
-      this.userPermissions.product_edit = this.hasPermission([
-        "product-edit",
-      ]);
+      this.userPermissions.product_edit = this.hasPermission(["product-edit"]);
       this.userPermissions.product_delete = this.hasPermission([
         "product-delete",
       ]);
@@ -401,9 +434,7 @@ export default {
       // }
 
       // if user is not authorize
-      if (
-        !this.userPermissions.product_list
-      ) {
+      if (!this.userPermissions.product_list) {
         this.$router.push("/unauthorize").catch(() => {});
       }
     },
@@ -439,8 +470,6 @@ export default {
         ) {
           this.userRolesPermissions();
         }
-
-    
       };
     },
     // Create callback function to receive barcode when the scanner is already done
@@ -462,7 +491,8 @@ export default {
     brandErrors() {
       const errors = [];
       if (!this.$v.editedItem.brand_id.$dirty) return errors;
-      !this.$v.editedItem.brand_id.required && errors.push("Brand is required.");
+      !this.$v.editedItem.brand_id.required &&
+        errors.push("Brand is required.");
       return errors;
     },
     modelErrors() {
@@ -475,6 +505,13 @@ export default {
       const errors = [];
       if (!this.$v.editedItem.serial.$dirty) return errors;
       !this.$v.editedItem.serial.required && errors.push("Serial is required.");
+      return errors;
+    },
+    branchErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.branch_id.$dirty) return errors;
+      !this.$v.editedItem.branch_id.required &&
+        errors.push("Branch is required.");
       return errors;
     },
   },

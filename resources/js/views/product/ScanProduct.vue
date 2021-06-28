@@ -17,7 +17,7 @@
             </v-breadcrumbs-item>
           </template>
         </v-breadcrumbs>
-        <v-card>
+        <v-card max-width="500px">
           <v-card-title class="mb-0 pb-0">
             <span class="headline">Scan Product</span>
           </v-card-title>
@@ -66,6 +66,23 @@
                 </v-autocomplete>
               </v-col>
             </v-row>
+            <v-row>
+              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
+                <v-autocomplete
+                  v-model="editedItem.branch_id"
+                  :items="branches"
+                  item-text="name"
+                  item-value="id"
+                  label="Branch"
+                  required
+                  :error-messages="branchErrors"
+                  @input="$v.editedItem.branch_id.$touch()"
+                  @blur="$v.editedItem.branch_id.$touch()"
+                  v-if="user.id === 1"
+                >
+                </v-autocomplete>
+              </v-col>
+            </v-row>
           </v-card-text>
 
           <v-card-actions>
@@ -109,6 +126,7 @@ export default {
 
   validations: {
     editedItem: {
+      branch_id: { required },
       brand_id: { required },
       model: { required },
       serial: { required },
@@ -125,7 +143,7 @@ export default {
           link: "/product/index",
         },
         {
-          text: "Create User",
+          text: "Create Product",
           disabled: true,
         },
       ],
@@ -134,12 +152,14 @@ export default {
       permissions: Home.data().permissions,
       editedIndex: -1,
       editedItem: {
+        branch_id: "",
         brand: "",
         brand_id: "",
         model: "",
         serial: "",
       },
       defaultItem: {
+        branch_id: "",
         brand: "",
         brand_id: "",
         model: "",
@@ -149,6 +169,8 @@ export default {
       user_permissions: [],
       user_roles: [],
       brands: [],
+      branches: [],
+      user: "",
     };
   },
 
@@ -157,6 +179,10 @@ export default {
       Axios.get("/api/product/create").then(
         (response) => {
           this.brands = response.data.brands;
+          this.branches = response.data.branches;
+          this.editedItem.branch_id = response.data.user.branch_id;
+          this.user = response.data.user;
+
         },
         (error) => {
           this.isUnauthorized(error);
@@ -184,6 +210,7 @@ export default {
 
         Axios.post("/api/product/store", data).then(
           (response) => {
+            console.log(response.data);
             if (response.data.success) {
               // send data to Sockot.IO Server
               // this.$socket.emit("sendData", { action: "product-create" });
@@ -230,7 +257,7 @@ export default {
     },
 
     getRolesPermissions() {
-      this.permissions.user_create = this.hasPermission(["user-create"]);
+      this.permissions.user_create = this.hasPermission(["product-create"]);
 
       // if user is not authorize
       if (!this.permissions.user_create) {
@@ -300,6 +327,12 @@ export default {
       const errors = [];
       if (!this.$v.editedItem.serial.$dirty) return errors;
       !this.$v.editedItem.serial.required && errors.push("Serial is required.");
+      return errors;
+    },
+    branchErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.branch_id.$dirty) return errors;
+      !this.$v.editedItem.branch_id.required && errors.push("Branch is required.");
       return errors;
     },
   },
