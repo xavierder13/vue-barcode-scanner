@@ -22,6 +22,7 @@ class ProductController extends Controller
         $products = Product::with('brand')
                            ->with('branch')
                            ->with('user')
+                           ->select(DB::raw("*, DATE_FORMAT(created_at, '%m/%d/%Y') as date_created"))
                            ->get();
 
         // if auth is not admin then filter per branch
@@ -31,6 +32,7 @@ class ProductController extends Controller
                                ->with('branch')
                                ->with('user')
                                ->where('branch_id' ,'=' ,$user->branch_id )
+                               ->select(DB::raw("*, DATE_FORMAT(created_at, '%m/%d/%Y') as date_created"))
                                ->get();
         }
 
@@ -60,20 +62,20 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        
+  
         $rules = [
-            'branch_id.integer' => 'Branch must be an integer',
-            'brand_id.required' => 'Brand is required',
-            'brand_id.integer' => 'Brand must be an integer',
-            'model.required' => 'Model is required',
-            'serial.required' => 'Serial Number is required',
+            'products.*.branch_id.integer' => 'Branch must be an integer',
+            'products.*.brand_id.required' => 'Brand is required',
+            'products.*.brand_id.integer' => 'Brand must be an integer',
+            'products.*.model.required' => 'Model is required',
+            'products.*.serial.required' => 'Serial Number is required',
         ];
 
         $valid_fields = [
-            'branch_id' => 'nullable|integer',
-            'brand_id' => 'required|integer',
-            'model' => 'required',
-            'serial' => 'required',
+            'products.*.branch_id' => 'nullable|integer',
+            'products.*.brand_id' => 'required|integer',
+            'products.*.model' => 'required',
+            'products.*.serial' => 'required',
         ];
 
         $validator = Validator::make($request->all(), $valid_fields, $rules);
@@ -84,30 +86,24 @@ class ProductController extends Controller
         }
 
         $user = Auth::user();
-        $branch_id = $request->get('branch_id');
 
-        // if auth is not admin then filter per branch
-        if($user->id !== 1)
+        $ctr = count($request->get('products'));
+        $products = $request->get('products');
+        for($x=0; $x < $ctr; $x++)
         {
-            $branch_id = $user->branch_id;
+
+            $product = new Product();
+            $product->user_id = $user->id;
+            $product->branch_id = $products[$x]['branch_id'];
+            $product->brand_id = $products[$x]['brand_id'];
+            $product->model = $products[$x]['model'];
+            $product->serial = $products[$x]['serial'];
+            $product->quantity = 1;
+            $product->save();
+
         }
 
-        $product = new Product();
-        $product->user_id = $user->id;
-        $product->branch_id = $branch_id;
-        $product->brand_id = $request->get('brand_id');
-        $product->model = $request->get('model');
-        $product->serial = $request->get('serial');
-        $product->quantity = 1;
-        $product->save();
-
-        $product = Product::with('brand')
-                          ->with('branch')
-                          ->with('user')
-                          ->where('id', '=', $product->id)
-                          ->first();
-
-        return response()->json(['success' => 'Record has successfully added', 'product' => $product], 200);
+        return response()->json(['success' => 'Record has successfully added'], 200);
     }
 
     public function edit($product_id)
@@ -192,8 +188,8 @@ class ProductController extends Controller
     }
 
 
-    public function export()
-    {
+    public function export($branch_id)
+    {   
         return Excel::download(new ProductsExport, 'products.xls');
     }
 }

@@ -17,13 +17,93 @@
             </v-breadcrumbs-item>
           </template>
         </v-breadcrumbs>
-        <v-card max-width="500px">
+        <v-card>
           <v-card-title class="mb-0 pb-0">
             <span class="headline">Scan Product</span>
           </v-card-title>
           <v-divider></v-divider>
-          <v-card-text class="ml-4">
+          <v-card-text>
             <v-row>
+              <v-col>
+                <v-simple-table id="procedureTable">
+                  <thead>
+                    <tr>
+                      <th>Serial</th>
+                      <th class="text-left">Model</th>
+                      <th class="text-left">Brand</th>
+                      <th class="text-left" v-if="user.id === 1">Branch</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(field, index) in products" :key="index">
+                      <td>
+                        <v-text-field
+                          name="serial"
+                          v-model="field.serial"
+                          readonly
+                        ></v-text-field>
+                      </td>
+                      <td>
+                        <v-text-field
+                          name="model"
+                          v-model="field.model"
+                          :error-messages="errorFields[index]['model']"
+                          @keyup="getFieldValue(index, 'model', field.model)"
+                          @blur="getFieldValue(index, 'model', field.model)"
+                        ></v-text-field>
+                      </td>
+                      <td>
+                        <v-autocomplete
+                          v-model="field.brand_id"
+                          :items="brands"
+                          item-text="name"
+                          item-value="id"
+                          :error-messages="errorFields[index]['brand_id']"
+                          @keyup="
+                            getFieldValue(index, 'brand_id', field.brand_id)
+                          "
+                          @blur="
+                            getFieldValue(index, 'brand_id', field.brand_id)
+                          "
+                        >
+                        </v-autocomplete>
+                      </td>
+                      <td v-if="user.id === 1">
+                        <v-autocomplete
+                          v-model="field.branch_id"
+                          :items="branches"
+                          item-text="name"
+                          item-value="id"
+                          :error-messages="errorFields[index]['branch_id']"
+                          @keyup="
+                            getFieldValue(index, 'branch_id', field.branch_id)
+                          "
+                          @blur="
+                            getFieldValue(index, 'branch_id', field.branch_id)
+                          "
+                          v-if="user.id === 1"
+                        >
+                        </v-autocomplete>
+                      </td>
+                      <td>
+                        <v-btn
+                          class="mx-2"
+                          fab
+                          dark
+                          small
+                          color="red"
+                          @click="removeRow(field)"
+                        >
+                          <v-icon dark> mdi-minus </v-icon>
+                        </v-btn>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+              </v-col>
+            </v-row>
+            <!-- <v-row>
               <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
                 <v-text-field
                   name="serial"
@@ -36,8 +116,8 @@
                   @blur="$v.editedItem.serial.$touch()"
                 ></v-text-field>
               </v-col>
-            </v-row>
-            <v-row>
+            </v-row> -->
+            <!-- <v-row>
               <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
                 <v-text-field
                   name="model"
@@ -82,7 +162,7 @@
                 >
                 </v-autocomplete>
               </v-col>
-            </v-row>
+            </v-row> -->
           </v-card-text>
 
           <v-card-actions>
@@ -94,7 +174,9 @@
             >
               Save
             </v-btn>
-            <v-btn color="#E0E0E0" to="/product/index" class="mb-4"> Cancel </v-btn>
+            <v-btn color="#E0E0E0" to="/product/index" class="mb-4">
+              Cancel
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-main>
@@ -171,6 +253,10 @@ export default {
       brands: [],
       branches: [],
       user: "",
+      products: [],
+      errorFields: [],
+      scanMode: "",
+      modes: [{mode: "Normal" }, {mode: "Multiple"}],
     };
   },
 
@@ -182,7 +268,6 @@ export default {
           this.branches = response.data.branches;
           this.editedItem.branch_id = response.data.user.branch_id;
           this.user = response.data.user;
-
         },
         (error) => {
           this.isUnauthorized(error);
@@ -200,13 +285,13 @@ export default {
     },
 
     save() {
-      this.$v.$touch();
-
-      if (!this.$v.$error) {
+      // this.$v.$touch();
+      
+      if (this.products.length) {
         this.disabled = true;
         this.overlay = true;
 
-        const data = this.editedItem;
+        const data = { products: this.products };
 
         Axios.post("/api/product/store", data).then(
           (response) => {
@@ -217,7 +302,20 @@ export default {
 
               this.showAlert();
               this.clear();
+            } else {
+              const object_names = Object.keys(response.data);
 
+              // get the indexes of validated existing code names
+              for (let [key, val] of object_names.entries()) {
+                let object = val.split(".");
+                let object_index = object[1];
+                let object_name = object[2];
+
+                this.errorFields[object_index][object_name] =
+                  response.data[val];
+              }
+
+              console.log(this.errorFields);
             }
             this.overlay = false;
             this.disabled = false;
@@ -234,6 +332,35 @@ export default {
     clear() {
       this.$v.$reset();
       this.editedItem = Object.assign({}, this.defaultItem);
+      this.products = [];
+    },
+
+    getFieldValue(index, fieldName, value) {
+      let fieldValue = value;
+
+      if (
+        (fieldName == "is_multiple" || fieldName == "to_diagnose") &&
+        !fieldValue
+      ) {
+        fieldValue = "N";
+      }
+
+      this.products[index][fieldName] = fieldValue;
+
+      // assign error message
+      if (!fieldValue) {
+        this.errorFields[index][fieldName] =
+          fieldName.toUpperCase() + " is required";
+      } else {
+        this.errorFields[index][fieldName] = "";
+      }
+    },
+
+    removeRow(item) {
+      const index = this.products.indexOf(item);
+
+      //Delete rows on the object products
+      this.products.splice(index, 1);
     },
 
     userRolesPermissions() {
@@ -300,8 +427,37 @@ export default {
     },
     // Create callback function to receive barcode when the scanner is already done
     onBarcodeScanned(barcode) {
-      // console.log(barcode);
+      console.log(barcode);
       this.editedItem.serial = barcode;
+
+      this.products.push({
+        brand_id: "",
+        model: "",
+        serial: barcode,
+        branch_id: this.user.branch_id,
+      });
+
+      this.errorFields.push({
+        brand: "",
+        model: "",
+        serial: barcode,
+        branch: "",
+      });
+
+      // if (this.products.length) {
+      //   for (let [index, val] of this.products.entries()) {
+      //     let fieldNames = Object.keys(val);
+
+      //     for (let [key, fieldName] of fieldNames.entries()) {
+      //       if (!this.products[index][fieldName]) {
+      //         this.errorFields[index][fieldName] =
+      //           fieldName.toUpperCase() + " is required";
+      //         // this.tableProcedureHasError = true;
+      //       }
+      //     }
+      //   }
+      // }
+
       // do something...
     },
     // Reset to the last barcode before hitting enter (whatever anything in the input box)
@@ -314,7 +470,8 @@ export default {
     brandErrors() {
       const errors = [];
       if (!this.$v.editedItem.brand_id.$dirty) return errors;
-      !this.$v.editedItem.brand_id.required && errors.push("Brand is required.");
+      !this.$v.editedItem.brand_id.required &&
+        errors.push("Brand is required.");
       return errors;
     },
     modelErrors() {
@@ -332,7 +489,8 @@ export default {
     branchErrors() {
       const errors = [];
       if (!this.$v.editedItem.branch_id.$dirty) return errors;
-      !this.$v.editedItem.branch_id.required && errors.push("Branch is required.");
+      !this.$v.editedItem.branch_id.required &&
+        errors.push("Branch is required.");
       return errors;
     },
   },

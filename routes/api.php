@@ -119,10 +119,10 @@ Route::group(['prefix' => 'product', 'middleware' => ['auth:api', 'product.maint
 
 });
 
-Route::get('/product/export', [
+Route::get('/product/export/{id}', [
     'uses' => 'API\ProductController@export',
     'as' => 'product.export',
-]);
+])->middleware('product.maintenance');
 
 //Permissions
 Route::group(['prefix' => 'permission', 'middleware' => ['auth:api', 'permission.maintenance']], function(){

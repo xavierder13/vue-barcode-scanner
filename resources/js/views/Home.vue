@@ -185,6 +185,7 @@ export default {
         product_create: false,
         product_edit: false,
         product_delete: false,
+        product_export: false,
         role_list: false,
         role_create: false,
         role_edit: false,

@@ -12,7 +12,7 @@
         <v-card>
           <v-card-title>
             Product Lists
-            <v-btn color="success" class="ml-4" small @click="exportData()"
+            <v-btn color="success" class="ml-4" small @click="exportData()" v-if="userPermissions.product_export"
               ><v-icon class="mr-1" small> mdi-microsoft-excel </v-icon
               >Export</v-btn
             >
@@ -27,7 +27,7 @@
             <template>
               <v-toolbar flat>
                 <v-spacer></v-spacer>
-                <v-btn
+                <!-- <v-btn
                   color="primary"
                   fab
                   dark
@@ -35,7 +35,7 @@
                   @click="clear() + (dialog = true)"
                 >
                   <v-icon>mdi-plus</v-icon>
-                </v-btn>
+                </v-btn> -->
                 <v-dialog v-model="dialog" max-width="500px" persistent>
                   <v-card>
                     <v-card-title>
@@ -196,6 +196,7 @@ export default {
         { text: "Model", value: "model" },
         { text: "Serial", value: "serial" },
         { text: "Branch", value: "branch" },
+        { text: "Date Created", value: "date_created" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       disabled: false,
@@ -248,6 +249,7 @@ export default {
           this.editedItem.branch_id = response.data.user.branch_id;
           this.user = response.data.user;
           this.loading = false;
+         
         },
         (error) => {
           this.isUnauthorized(error);
@@ -389,6 +391,7 @@ export default {
     clear() {
       this.$v.$reset();
       this.editedItem = Object.assign({}, this.defaultItem);
+      this.editedItem.branch_id = this.user.branch_id;
     },
     userRolesPermissions() {
       Axios.get("api/user/roles_permissions").then((response) => {
@@ -408,7 +411,7 @@ export default {
     {
       window.open(
         location.origin +
-          "/api/product/export",
+          "/api/product/export/" + this.user.branch_id,
         "_blank"
       );
     },
@@ -422,16 +425,19 @@ export default {
       this.userPermissions.product_delete = this.hasPermission([
         "product-delete",
       ]);
+      this.userPermissions.product_export = this.hasPermission([
+        "product-export",
+      ]);
 
-      // // hide column actions if user has no permission
-      // if (
-      //   !this.userPermissions.product_edit &&
-      //   !this.userPermissions.product_delete
-      // ) {
-      //   this.headers[1].align = " d-none";
-      // } else {
-      //   this.headers[1].align = "";
-      // }
+      // hide column actions if user has no permission
+      if (
+        !this.userPermissions.product_edit &&
+        !this.userPermissions.product_delete
+      ) {
+        this.headers[5].align = " d-none";
+      } else {
+        this.headers[5].align = "";
+      }
 
       // if user is not authorize
       if (!this.userPermissions.product_list) {
