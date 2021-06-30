@@ -43,7 +43,7 @@
                     <v-card-text>
                       <v-container>
                         <v-row>
-                          <v-col>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
                             <v-text-field
                               name="branch_code"
                               v-model="editedBranch.code"
@@ -56,7 +56,7 @@
                           </v-col>
                         </v-row>
                         <v-row>
-                          <v-col>
+                          <v-col class="mt-0 mb-0 pt-0 pb-0">
                             <v-text-field
                               name="branch"
                               v-model="editedBranch.name"

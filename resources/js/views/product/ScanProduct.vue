@@ -17,15 +17,27 @@
             </v-breadcrumbs-item>
           </template>
         </v-breadcrumbs>
-        <v-card>
+        <v-card :max-width="switch1 ? '100%' : '500px'">
           <v-card-title class="mb-0 pb-0">
             <span class="headline">Scan Product</span>
+            <v-divider vertical class="ml-3 mr-3"></v-divider>
+            <v-switch
+              class="ma-0 pa-0"
+              hide-details=""
+              inset
+              v-model="switch1"
+              @click="clear()"
+            ></v-switch>
+            <v-chip :color="switch1 ? 'primary' : 'secondary'">
+              {{ scanMode }}
+            </v-chip>
           </v-card-title>
           <v-divider></v-divider>
           <v-card-text>
-            <v-row>
+            <v-row v-if="switch1">
+              <!-- if switch1 is true (Multiple Scan) -->
               <v-col>
-                <v-simple-table id="procedureTable">
+                <v-simple-table>
                   <thead>
                     <tr>
                       <th>Serial</th>
@@ -103,66 +115,71 @@
                 </v-simple-table>
               </v-col>
             </v-row>
-            <!-- <v-row>
-              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
-                <v-text-field
-                  name="serial"
-                  label="Serial"
-                  v-model="editedItem.serial"
-                  readonly
-                  required
-                  :error-messages="serialErrors"
-                  @input="$v.editedItem.serial.$touch()"
-                  @blur="$v.editedItem.serial.$touch()"
-                ></v-text-field>
-              </v-col>
-            </v-row> -->
-            <!-- <v-row>
-              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
-                <v-text-field
-                  name="model"
-                  label="Model"
-                  v-model="editedItem.model"
-                  required
-                  :error-messages="modelErrors"
-                  @input="$v.editedItem.model.$touch()"
-                  @blur="$v.editedItem.model.$touch()"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
-                <v-autocomplete
-                  v-model="editedItem.brand_id"
-                  :items="brands"
-                  item-text="name"
-                  item-value="id"
-                  label="Brand"
-                  required
-                  :error-messages="brandErrors"
-                  @input="$v.editedItem.brand_id.$touch()"
-                  @blur="$v.editedItem.brand_id.$touch()"
-                >
-                </v-autocomplete>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="11" class="mt-0 mb-0 pt-0 pb-0">
-                <v-autocomplete
-                  v-model="editedItem.branch_id"
-                  :items="branches"
-                  item-text="name"
-                  item-value="id"
-                  label="Branch"
-                  required
-                  :error-messages="branchErrors"
-                  @input="$v.editedItem.branch_id.$touch()"
-                  @blur="$v.editedItem.branch_id.$touch()"
-                  v-if="user.id === 1"
-                >
-                </v-autocomplete>
-              </v-col>
-            </v-row> -->
+            <v-container>
+              <div v-if="!switch1">
+                <!-- if switch1 is false (Normal Mode) -->
+                <v-row>
+                  <v-col class="mt-0 mb-0 pt-0 pb-0">
+                    <v-text-field
+                      name="serial"
+                      label="Serial"
+                      v-model="editedItem.serial"
+                      readonly
+                      required
+                      :error-messages="serialErrors"
+                      @input="$v.editedItem.serial.$touch()"
+                      @blur="$v.editedItem.serial.$touch()"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="mt-0 mb-0 pt-0 pb-0">
+                    <v-text-field
+                      name="model"
+                      label="Model"
+                      v-model="editedItem.model"
+                      required
+                      :error-messages="modelErrors"
+                      @input="$v.editedItem.model.$touch()"
+                      @blur="$v.editedItem.model.$touch()"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="mt-0 mb-0 pt-0 pb-0">
+                    <v-autocomplete
+                      v-model="editedItem.brand_id"
+                      :items="brands"
+                      item-text="name"
+                      item-value="id"
+                      label="Brand"
+                      required
+                      :error-messages="brandErrors"
+                      @input="$v.editedItem.brand_id.$touch()"
+                      @blur="$v.editedItem.brand_id.$touch()"
+                    >
+                    </v-autocomplete>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col class="mt-0 mb-0 pt-0 pb-0">
+                    <v-autocomplete
+                      v-model="editedItem.branch_id"
+                      :items="branches"
+                      item-text="name"
+                      item-value="id"
+                      label="Branch"
+                      required
+                      :error-messages="branchErrors"
+                      @input="$v.editedItem.branch_id.$touch()"
+                      @blur="$v.editedItem.branch_id.$touch()"
+                      v-if="user.id === 1"
+                    >
+                    </v-autocomplete>
+                  </v-col>
+                </v-row>
+              </div>
+            </v-container>
           </v-card-text>
 
           <v-card-actions>
@@ -170,7 +187,7 @@
               color="primary"
               @click="save"
               :disabled="disabled"
-              class="ml-6 mb-4 mr-1"
+              class="ml-4 mb-4 mr-1"
             >
               Save
             </v-btn>
@@ -255,8 +272,7 @@ export default {
       user: "",
       products: [],
       errorFields: [],
-      scanMode: "",
-      modes: [{mode: "Normal" }, {mode: "Multiple"}],
+      switch1: false,
     };
   },
 
@@ -286,16 +302,26 @@ export default {
 
     save() {
       // this.$v.$touch();
-      
-      if (this.products.length) {
+
+      // if scanMode is Normal Mode
+      if (!this.switch1) {
+        this.$v.$touch();
+      }
+
+      if (this.products.length || !this.$v.$error) {
         this.disabled = true;
         this.overlay = true;
+
+        // scan mode normal
+        if (!this.switch1) {
+          this.$v.$touch();
+          this.products.push(this.editedItem);
+        }
 
         const data = { products: this.products };
 
         Axios.post("/api/product/store", data).then(
           (response) => {
-            console.log(response.data);
             if (response.data.success) {
               // send data to Sockot.IO Server
               // this.$socket.emit("sendData", { action: "product-create" });
@@ -428,21 +454,24 @@ export default {
     // Create callback function to receive barcode when the scanner is already done
     onBarcodeScanned(barcode) {
       console.log(barcode);
-      this.editedItem.serial = barcode;
 
-      this.products.push({
-        brand_id: "",
-        model: "",
-        serial: barcode,
-        branch_id: this.user.branch_id,
-      });
+      if (this.switch1) {
+        this.products.push({
+          brand_id: "",
+          model: "",
+          serial: barcode,
+          branch_id: this.user.branch_id,
+        });
 
-      this.errorFields.push({
-        brand: "",
-        model: "",
-        serial: barcode,
-        branch: "",
-      });
+        this.errorFields.push({
+          brand: "",
+          model: "",
+          serial: "",
+          branch: "",
+        });
+      } else {
+        this.editedItem.serial = barcode;
+      }
 
       // if (this.products.length) {
       //   for (let [index, val] of this.products.entries()) {
@@ -493,6 +522,13 @@ export default {
         errors.push("Branch is required.");
       return errors;
     },
+    scanMode() {
+      if (this.switch1) {
+        return " Multiple Scan";
+      } else {
+        return " Normal Mode";
+      }
+    },
   },
   created() {
     // Add barcode scan listener and pass the callback function
@@ -509,6 +545,7 @@ export default {
     this.userRolesPermissions();
     this.$barcodeScanner.init(this.onBarcodeScanned);
     // this.websocket();
+
   },
 };
 </script>

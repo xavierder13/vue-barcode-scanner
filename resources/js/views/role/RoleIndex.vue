@@ -143,9 +143,7 @@
                 class="mr-1"
                 color="green"
                 @click="editRole(item)"
-                v-if="
-                  userPermissions.role_edit && item.name != 'Administrator'
-                "
+                v-if="userPermissions.role_edit && item.name != 'Administrator'"
               >
                 mdi-pencil
               </v-icon>
@@ -501,7 +499,8 @@ export default {
     },
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
+    Axios.defaults.headers.common["Authorization"] =
+      "Bearer " + localStorage.getItem("access_token");
     this.getRole();
     this.userRolesPermissions();
     // this.websocket();

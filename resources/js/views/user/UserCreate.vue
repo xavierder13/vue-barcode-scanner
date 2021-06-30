@@ -23,105 +23,107 @@
           </v-card-title>
           <v-divider></v-divider>
           <v-card-text class="ml-4">
-            <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
-                <v-text-field
-                  name="name"
-                  v-model="editedItem.name"
-                  :error-messages="nameErrors"
-                  label="Full Name"
-                  @input="$v.editedItem.name.$touch()"
-                  @blur="$v.editedItem.name.$touch()"
-                  :readonly="editedItem.id == 1 ? true : false"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
-                <v-text-field
-                  name="email"
-                  v-model="editedItem.email"
-                  :error-messages="emailErrors"
-                  label="E-mail"
-                  @input="$v.editedItem.email.$touch()"
-                  @blur="$v.editedItem.email.$touch()"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
-                <v-text-field
-                  name="password"
-                  v-model="editedItem.password"
-                  :error-messages="passwordErrors"
-                  label="Password"
-                  required
-                  @input="$v.editedItem.password.$touch()"
-                  @blur="$v.editedItem.password.$touch()"
-                  type="password"
-                  :readonly="editedItem.id == 1 ? true : false"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
-                <v-text-field
-                  name="confirm_password"
-                  v-model="editedItem.confirm_password"
-                  :error-messages="confirm_passwordErrors"
-                  label="Confirm Password"
-                  required
-                  @input="$v.editedItem.confirm_password.$touch()"
-                  @blur="$v.editedItem.confirm_password.$touch()"
-                  type="password"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
-                <v-autocomplete
-                  v-model="editedItem.roles"
-                  :items="roles"
-                  item-text="name"
-                  item-value="name"
-                  label="Roles"
-                  multiple
-                  chips
-                >
-                  <template v-slot:selection="data">
-                    <v-chip
-                      color="secondary"
-                      v-bind="data.attrs"
-                      :input-value="data.selected"
-                      @click="data.select"
-                    >
-                      {{ data.item.name }}
-                    </v-chip>
-                  </template>
-                </v-autocomplete>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
-                <v-autocomplete
-                  v-model="editedItem.branch_id"
-                  :items="branches"
-                  item-text="name"
-                  item-value="id"
-                  label="Branch"
-                  required
-                  :error-messages="branchErrors"
-                  @input="$v.editedItem.branch_id.$touch()"
-                  @blur="$v.editedItem.branch_id.$touch()"
-                >
-                </v-autocomplete>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="2" class="mt-0 mb-0 pt-0 pb-0">
-                <v-switch v-model="switch1" :label="activeStatus"></v-switch>
-              </v-col>
-            </v-row>
+            <v-container>
+              <v-row>
+                <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-text-field
+                    name="name"
+                    v-model="editedItem.name"
+                    :error-messages="nameErrors"
+                    label="Full Name"
+                    @input="$v.editedItem.name.$touch()"
+                    @blur="$v.editedItem.name.$touch()"
+                    :readonly="editedItem.id == 1 ? true : false"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-text-field
+                    name="email"
+                    v-model="editedItem.email"
+                    :error-messages="emailErrors"
+                    label="E-mail"
+                    @input="$v.editedItem.email.$touch()"
+                    @blur="$v.editedItem.email.$touch()"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-text-field
+                    name="password"
+                    v-model="editedItem.password"
+                    :error-messages="passwordErrors"
+                    label="Password"
+                    required
+                    @input="$v.editedItem.password.$touch()"
+                    @blur="$v.editedItem.password.$touch()"
+                    type="password"
+                    :readonly="editedItem.id == 1 ? true : false"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-text-field
+                    name="confirm_password"
+                    v-model="editedItem.confirm_password"
+                    :error-messages="confirm_passwordErrors"
+                    label="Confirm Password"
+                    required
+                    @input="$v.editedItem.confirm_password.$touch()"
+                    @blur="$v.editedItem.confirm_password.$touch()"
+                    type="password"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-autocomplete
+                    v-model="editedItem.roles"
+                    :items="roles"
+                    item-text="name"
+                    item-value="name"
+                    label="Roles"
+                    multiple
+                    chips
+                  >
+                    <template v-slot:selection="data">
+                      <v-chip
+                        color="secondary"
+                        v-bind="data.attrs"
+                        :input-value="data.selected"
+                        @click="data.select"
+                      >
+                        {{ data.item.name }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-autocomplete
+                    v-model="editedItem.branch_id"
+                    :items="branches"
+                    item-text="name"
+                    item-value="id"
+                    label="Branch"
+                    required
+                    :error-messages="branchErrors"
+                    @input="$v.editedItem.branch_id.$touch()"
+                    @blur="$v.editedItem.branch_id.$touch()"
+                  >
+                  </v-autocomplete>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="2" class="mt-0 mb-0 pt-0 pb-0">
+                  <v-switch v-model="switch1" :label="activeStatus"></v-switch>
+                </v-col>
+              </v-row>
+            </v-container>
           </v-card-text>
 
           <v-card-actions>
@@ -390,12 +392,14 @@ export default {
     branchErrors() {
       const errors = [];
       if (!this.$v.editedItem.branch_id.$dirty) return errors;
-      !this.$v.editedItem.branch_id.required && errors.push("Branch is required.");
+      !this.$v.editedItem.branch_id.required &&
+        errors.push("Branch is required.");
       return errors;
     },
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("access_token");
+    Axios.defaults.headers.common["Authorization"] =
+      "Bearer " + localStorage.getItem("access_token");
     this.getRole();
     this.userRolesPermissions();
     // this.websocket();

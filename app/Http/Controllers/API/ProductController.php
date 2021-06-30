@@ -64,6 +64,7 @@ class ProductController extends Controller
     {
   
         $rules = [
+            'products.*.branch_id.required' => 'Branch is required',
             'products.*.branch_id.integer' => 'Branch must be an integer',
             'products.*.brand_id.required' => 'Brand is required',
             'products.*.brand_id.integer' => 'Brand must be an integer',
@@ -72,7 +73,7 @@ class ProductController extends Controller
         ];
 
         $valid_fields = [
-            'products.*.branch_id' => 'nullable|integer',
+            'products.*.branch_id' => 'required|integer',
             'products.*.brand_id' => 'required|integer',
             'products.*.model' => 'required',
             'products.*.serial' => 'required',
