@@ -371,7 +371,6 @@ export default {
       branches: [],
       roles: [],
       roles_permissions: [],
-      permissions: Home.data().permissions,
       editedIndex: -1,
       editedItem: {
         name: "",
