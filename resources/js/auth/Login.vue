@@ -32,7 +32,7 @@
                     :error-messages="emailErrors"
                     @change="$v.email.$touch()"
                     @blur="$v.email.$touch()"
-                    @keyup="clear()"
+                    @keyup="isInvalid = false"
                   ></v-text-field>
 
                   <v-text-field
@@ -46,7 +46,7 @@
                     :error-messages="passwordErrors"
                     @change="$v.password.$touch()"
                     @blur="$v.password.$touch()"
-                    @keyup="clear()"
+                    @keyup="isInvalid = false"
                   ></v-text-field>
                 </v-form>
               </v-card-text>
