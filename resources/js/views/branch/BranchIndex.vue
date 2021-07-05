@@ -127,7 +127,7 @@
 <script>
 let access_token;
 
-import Axios from "axios";
+import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 import Home from "../Home.vue";
@@ -187,7 +187,7 @@ export default {
   methods: {
     getBranch() {
       this.loading = true;
-      Axios.get("/api/branch/index").then(
+      axios.get("/api/branch/index").then(
         (response) => {
           this.branches = response.data.branches;
           this.loading = false;
@@ -207,7 +207,7 @@ export default {
     deleteBranch(branch_id) {
       const data = { branch_id: branch_id };
       this.loading = true;
-      Axios.post("/api/branch/delete", data).then(
+      axios.post("/api/branch/delete", data).then(
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
@@ -285,7 +285,7 @@ export default {
           const data = this.editedBranch;
           const branch_id = this.editedBranch.id;
 
-          Axios.post("/api/branch/update/" + branch_id, data).then(
+          axios.post("/api/branch/update/" + branch_id, data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -309,7 +309,7 @@ export default {
         } else {
           const data = this.editedBranch;
 
-          Axios.post("/api/branch/store", data).then(
+          axios.post("/api/branch/store", data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -337,7 +337,7 @@ export default {
       this.editedBranch.name = "";
     },
     userRolesPermissions() {
-      Axios.get("api/user/roles_permissions").then((response) => {
+      axios.get("api/user/roles_permissions").then((response) => {
         this.user_permissions = response.data.user_permissions;
         this.user_roles = response.data.user_roles;
         this.getRolesPermissions();
@@ -438,7 +438,7 @@ export default {
     },
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] =
+    axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getBranch();
     this.userRolesPermissions();

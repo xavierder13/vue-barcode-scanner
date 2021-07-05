@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import Axios from "axios";
+import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 
@@ -113,7 +113,7 @@ export default {
         const password = this.password;
         const data = { email: email, password: password };
 
-        Axios.post("/api/auth/login", data).then(
+        axios.post("/api/auth/login", data).then(
           (response) => {
             if (response.data.access_token) {
               localStorage.setItem("access_token", response.data.access_token);

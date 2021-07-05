@@ -122,7 +122,7 @@
 <script>
 let access_token;
 
-import Axios from "axios";
+import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 import Home from "../Home.vue";
@@ -181,7 +181,7 @@ export default {
   methods: {
     getBrand() {
       this.loading = true;
-      Axios.get("/api/brand/index").then(
+      axios.get("/api/brand/index").then(
         (response) => {
           this.brands = response.data.brands;
           this.loading = false;
@@ -201,7 +201,7 @@ export default {
     deleteBrand(brand_id) {
       const data = { brand_id: brand_id };
       this.loading = true;
-      Axios.post("/api/brand/delete", data).then(
+      axios.post("/api/brand/delete", data).then(
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
@@ -279,7 +279,7 @@ export default {
           const data = this.editedBrand;
           const brand_id = this.editedBrand.id;
 
-          Axios.post("/api/brand/update/" + brand_id, data).then(
+          axios.post("/api/brand/update/" + brand_id, data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -303,7 +303,7 @@ export default {
         } else {
           const data = this.editedBrand;
 
-          Axios.post("/api/brand/store", data).then(
+          axios.post("/api/brand/store", data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -331,7 +331,7 @@ export default {
       this.editedBrand.name = "";
     },
     userRolesPermissions() {
-      Axios.get("api/user/roles_permissions").then((response) => {
+      axios.get("api/user/roles_permissions").then((response) => {
         this.user_permissions = response.data.user_permissions;
         this.user_roles = response.data.user_roles;
         this.getRolesPermissions();
@@ -434,7 +434,7 @@ export default {
     },
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] =
+    axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
     this.userRolesPermissions();

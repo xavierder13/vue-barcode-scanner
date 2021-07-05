@@ -205,7 +205,7 @@ let access_token;
 let user_permissions;
 let user_roles;
 
-import Axios from "axios";
+import axios from "axios";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -278,7 +278,7 @@ export default {
 
   methods: {
     getBrand() {
-      Axios.get("/api/product/create").then(
+      axios.get("/api/product/create").then(
         (response) => {
           this.brands = response.data.brands;
           this.branches = response.data.branches;
@@ -320,7 +320,7 @@ export default {
 
         const data = { products: this.products };
 
-        Axios.post("/api/product/store", data).then(
+        axios.post("/api/product/store", data).then(
           (response) => {
             if (response.data.success) {
               // send data to Sockot.IO Server
@@ -390,7 +390,7 @@ export default {
     },
 
     userRolesPermissions() {
-      Axios.get("api/user/roles_permissions").then(
+      axios.get("api/user/roles_permissions").then(
         (response) => {
           this.user_permissions = response.data.user_permissions;
           this.user_roles = response.data.user_roles;
@@ -539,7 +539,7 @@ export default {
     this.$barcodeScanner.destroy();
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] =
+    axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
     this.userRolesPermissions();
