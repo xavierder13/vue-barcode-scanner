@@ -166,9 +166,8 @@
   </div>
 </template>
 <script>
-let access_token;
 
-import Axios from "axios";
+import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
 import Home from "../Home.vue";
@@ -241,7 +240,7 @@ export default {
   methods: {
     getProduct() {
       this.loading = true;
-      Axios.get("/api/product/index").then(
+      axios.get("/api/product/index").then(
         (response) => {
           this.products = response.data.products;
           this.brands = response.data.brands;
@@ -266,7 +265,7 @@ export default {
     deleteProduct(product_id) {
       const data = { product_id: product_id };
       this.loading = true;
-      Axios.post("/api/product/delete", data).then(
+      axios.post("/api/product/delete", data).then(
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
@@ -344,7 +343,7 @@ export default {
           const data = this.editedItem;
           const product_id = this.editedItem.id;
 
-          Axios.post("/api/product/update/" + product_id, data).then(
+          axios.post("/api/product/update/" + product_id, data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -365,7 +364,7 @@ export default {
         } else {
           const data = this.editedItem;
 
-          Axios.post("/api/product/store", data).then(
+          axios.post("/api/product/store", data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -394,7 +393,7 @@ export default {
       this.editedItem.branch_id = this.user.branch_id;
     },
     userRolesPermissions() {
-      Axios.get("api/user/roles_permissions").then((response) => {
+      axios.get("api/user/roles_permissions").then((response) => {
         this.user_permissions = response.data.user_permissions;
         this.user_roles = response.data.user_roles;
         this.getRolesPermissions();
@@ -530,7 +529,7 @@ export default {
     this.$barcodeScanner.destroy();
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] =
+    axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getProduct();
     this.userRolesPermissions();

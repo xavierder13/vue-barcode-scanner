@@ -18,13 +18,9 @@
   </div>
 </template>
 <script>
-let access_token;
-let user_permissions;
-let user_roles;
 
 import axios from "axios";
 import { validationMixin } from "vuelidate";
-import { required, maxLength, email } from "vuelidate/lib/validators";
 import Home from "../Home.vue";
 
 export default {

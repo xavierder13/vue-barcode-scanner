@@ -151,10 +151,8 @@
 </template>
 
 <script>
-let access_token;
-let user_permissions;
-let user_roles;
-import Axios from "axios";
+
+import axios from "axios";
 
 export default {
   data() {
@@ -206,7 +204,7 @@ export default {
 
   methods: {
     getUser() {
-      Axios.get("/api/auth/init").then(
+      axios.get("/api/auth/init").then(
         (response) => {
           // console.log(response.data);
           this.user = response.data.user.name;
@@ -222,7 +220,7 @@ export default {
     },
     logout() {
       this.overlay = true;
-      Axios.get("/api/auth/logout").then(
+      axios.get("/api/auth/logout").then(
         (response) => {
           if (response.data.success) {
             this.overlay = false;
@@ -243,7 +241,7 @@ export default {
       );
     },
     userRolesPermissions() {
-      Axios.get("/api/user/roles_permissions").then((response) => {
+      axios.get("/api/user/roles_permissions").then((response) => {
         this.user_permissions = response.data.user_permissions;
         this.user_roles = response.data.user_roles;
         this.getRolesPermissions();
@@ -312,7 +310,7 @@ export default {
   },
 
   mounted() {
-    Axios.defaults.headers.common["Authorization"] =
+    axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
 
     this.getUser();

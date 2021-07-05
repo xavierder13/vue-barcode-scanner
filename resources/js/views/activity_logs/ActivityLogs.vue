@@ -45,9 +45,6 @@
   </div>
 </template>
 <script>
-let access_token;
-let user_permissions;
-let user_roles;
 
 import axios from "axios";
 import Home from "../Home.vue";

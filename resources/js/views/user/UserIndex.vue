@@ -308,9 +308,8 @@
   </div>
 </template>
 <script>
-let access_token;
 
-import Axios from "axios";
+import axios from "axios";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -399,7 +398,7 @@ export default {
   methods: {
     getUser() {
       this.loading = true;
-      Axios.get("/api/user/index").then(
+      axios.get("/api/user/index").then(
         (response) => {
           this.users = response.data.users;
           this.roles = response.data.roles;
@@ -429,7 +428,7 @@ export default {
     deleteUser(user_id) {
       const data = { user_id: user_id };
 
-      Axios.post("/api/user/delete", data).then(
+      axios.post("/api/user/delete", data).then(
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
@@ -525,7 +524,7 @@ export default {
           const data = this.editedItem;
           const user_id = this.editedItem.id;
 
-          Axios.post("/api/user/update/" + user_id, data).then(
+          axios.post("/api/user/update/" + user_id, data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -551,7 +550,7 @@ export default {
 
           const data = this.editedItem;
 
-          Axios.post("/api/user/store", data).then(
+          axios.post("/api/user/store", data).then(
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
@@ -606,7 +605,7 @@ export default {
       this.roles_permissions = roles;
     },
     userRolesPermissions() {
-      Axios.get("api/user/roles_permissions").then(
+      axios.get("api/user/roles_permissions").then(
         (response) => {
           this.user_permissions = response.data.user_permissions;
           this.user_roles = response.data.user_roles;
@@ -750,7 +749,7 @@ export default {
     },
   },
   mounted() {
-    Axios.defaults.headers.common["Authorization"] =
+    axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getUser();
 

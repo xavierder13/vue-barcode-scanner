@@ -120,7 +120,6 @@
   </div>
 </template>
 <script>
-let access_token;
 
 import axios from "axios";
 import { validationMixin } from "vuelidate";
