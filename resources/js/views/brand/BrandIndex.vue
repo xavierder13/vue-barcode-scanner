@@ -124,12 +124,9 @@
 import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
-import Home from "../Home.vue";
+import { mapState } from "vuex";
 
 export default {
-  components: {
-    Home,
-  },
 
   mixins: [validationMixin],
 
@@ -150,7 +147,6 @@ export default {
       disabled: false,
       dialog: false,
       brands: [],
-      userPermissions: Home.data().permissions,
       editedIndex: -1,
       editedBrand: {
         name: "",
@@ -172,8 +168,6 @@ export default {
         },
       ],
       loading: true,
-      user_permissions: [],
-      user_roles: [],
     };
   },
 
@@ -329,14 +323,7 @@ export default {
       this.$v.$reset();
       this.editedBrand.name = "";
     },
-    userRolesPermissions() {
-      axios.get("api/user/roles_permissions").then((response) => {
-        this.user_permissions = response.data.user_permissions;
-        this.user_roles = response.data.user_roles;
-        this.getRolesPermissions();
-      });
-    },
-
+    
     isUnauthorized(error) {
       // if unauthenticated (401)
       if (error.response.status == "401") {
@@ -344,69 +331,16 @@ export default {
       }
     },
 
-    getRolesPermissions() {
-      this.userPermissions.brand_list = this.hasPermission([
-        "brand-list",
-      ]);
-      this.userPermissions.brand_create = this.hasPermission([
-        "brand-create",
-      ]);
-      this.userPermissions.brand_edit = this.hasPermission([
-        "brand-edit",
-      ]);
-      this.userPermissions.brand_delete = this.hasPermission([
-        "brand-delete",
-      ]);
-
-      // hide column actions if user has no permission
-      if (
-        !this.userPermissions.brand_edit &&
-        !this.userPermissions.brand_delete
-      ) {
-        this.headers[2].align = " d-none";
-      } else {
-        this.headers[2].align = "";
-      }
-
-      // if user is not authorize
-      if (
-        !this.userPermissions.brand_list &&
-        !this.userPermissions.brand_create
-      ) {
-        this.$router.push("/unauthorize").catch(() => {});
-      }
-    },
-    hasRole(roles) {
-      let hasRole = false;
-
-      roles.forEach((value, index) => {
-        hasRole = this.user_roles.includes(value);
-      });
-
-      return hasRole;
-    },
-
-    hasPermission(permissions) {
-      let hasPermission = false;
-
-      permissions.forEach((value, index) => {
-        hasPermission = this.user_permissions.includes(value);
-      });
-
-      return hasPermission;
-    },
     websocket() {
       // Socket.IO fetch data
       this.$options.sockets.sendData = (data) => {
         let action = data.action;
         if (
-          action == "user-edit" ||
-          action == "role-edit" ||
-          action == "role-delete" ||
-          action == "permission-create" ||
-          action == "permission-delete"
+          action == "brand-create" ||
+          action == "brand-edit" ||
+          action == "brand-delete"
         ) {
-          this.userRolesPermissions();
+          this.getBrand();
         }
       };
     },
@@ -431,12 +365,12 @@ export default {
         return " Inactive";
       }
     },
+    ...mapState("userRolesPermissions", ["userRoles", "userPermissions"]),
   },
   mounted() {
     axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
-    this.userRolesPermissions();
     // this.websocket();
   },
 };

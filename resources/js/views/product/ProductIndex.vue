@@ -170,12 +170,9 @@
 import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
-import Home from "../Home.vue";
+import { mapState } from 'vuex';
 
 export default {
-  components: {
-    Home,
-  },
 
   mixins: [validationMixin],
 
@@ -203,7 +200,6 @@ export default {
       products: [],
       brands: [],
       branches: [],
-      userPermissions: Home.data().permissions,
       editedIndex: -1,
       editedItem: {
         branch_id: "",
@@ -231,8 +227,6 @@ export default {
         },
       ],
       loading: true,
-      user_permissions: [],
-      user_roles: [],
       user: "",
     };
   },
@@ -392,13 +386,6 @@ export default {
       this.editedItem = Object.assign({}, this.defaultItem);
       this.editedItem.branch_id = this.user.branch_id;
     },
-    userRolesPermissions() {
-      axios.get("api/user/roles_permissions").then((response) => {
-        this.user_permissions = response.data.user_permissions;
-        this.user_roles = response.data.user_roles;
-        this.getRolesPermissions();
-      });
-    },
 
     isUnauthorized(error) {
       // if unauthenticated (401)
@@ -415,65 +402,17 @@ export default {
       );
     },
 
-    getRolesPermissions() {
-      this.userPermissions.product_list = this.hasPermission(["product-list"]);
-      this.userPermissions.product_create = this.hasPermission([
-        "product-create",
-      ]);
-      this.userPermissions.product_edit = this.hasPermission(["product-edit"]);
-      this.userPermissions.product_delete = this.hasPermission([
-        "product-delete",
-      ]);
-      this.userPermissions.product_export = this.hasPermission([
-        "product-export",
-      ]);
-
-      // hide column actions if user has no permission
-      if (
-        !this.userPermissions.product_edit &&
-        !this.userPermissions.product_delete
-      ) {
-        this.headers[5].align = " d-none";
-      } else {
-        this.headers[5].align = "";
-      }
-
-      // if user is not authorize
-      if (!this.userPermissions.product_list) {
-        this.$router.push("/unauthorize").catch(() => {});
-      }
-    },
-    hasRole(roles) {
-      let hasRole = false;
-
-      roles.forEach((value, index) => {
-        hasRole = this.user_roles.includes(value);
-      });
-
-      return hasRole;
-    },
-
-    hasPermission(permissions) {
-      let hasPermission = false;
-
-      permissions.forEach((value, index) => {
-        hasPermission = this.user_permissions.includes(value);
-      });
-
-      return hasPermission;
-    },
     websocket() {
       // Socket.IO fetch data
       this.$options.sockets.sendData = (data) => {
         let action = data.action;
+        
         if (
-          action == "user-edit" ||
-          action == "role-edit" ||
-          action == "role-delete" ||
-          action == "permission-create" ||
-          action == "permission-delete"
+          action == "product-create" ||
+          action == "product-edit" ||
+          action == "product-delete"
         ) {
-          this.userRolesPermissions();
+          this.getProduct();
         }
       };
     },
@@ -519,6 +458,7 @@ export default {
         errors.push("Branch is required.");
       return errors;
     },
+    ...mapState("userRolesPermissions", ["userRoles", "userPermissions"]),
   },
   created() {
     // Add barcode scan listener and pass the callback function
@@ -532,7 +472,6 @@ export default {
     axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getProduct();
-    this.userRolesPermissions();
     this.$barcodeScanner.init(this.onBarcodeScanned);
     // this.websocket();
   },

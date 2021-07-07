@@ -8,6 +8,7 @@ import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 // import VueSocketio from 'vue-socket.io';
 import VueBarcodeScanner from 'vue-barcode-scanner'
+import store from './store';
 
 // Vue.use(VueSocketio, 'http://localhost:4000');
 Vue.use(Vuetify);   
@@ -23,5 +24,6 @@ const app = new Vue({
     vuetify: Vuetify,
     el: '#app',
     router,
+    store,
     render: h => h(App),
 });

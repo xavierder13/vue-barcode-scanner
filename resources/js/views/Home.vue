@@ -39,7 +39,7 @@
         </v-list-item> -->
         <v-list-group
           no-action
-          v-if="permissions.user_list || permissions.user_create"
+          v-if="userPermissions.user_list || userPermissions.user_create"
         >
           <!-- List Group Icon-->
           <v-icon slot="prependIcon">mdi-account-arrow-right-outline</v-icon>
@@ -50,12 +50,12 @@
             </v-list-item-content>
           </template>
           <!-- List Group Items -->
-          <v-list-item link to="/user/index" v-if="permissions.user_list">
+          <v-list-item link to="/user/index" v-if="userPermissions.user_list">
             <v-list-item-content>
               <v-list-item-title>User Record</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-          <v-list-item link to="/user/create" v-if="permissions.user_create">
+          <v-list-item link to="/user/create" v-if="userPermissions.user_create">
             <v-list-item-content>
               <v-list-item-title>Create New</v-list-item-title>
             </v-list-item-content>
@@ -85,14 +85,14 @@
         <v-list-group
           no-action
           v-if="
-            permissions.brand_list ||
-            permissions.brand_create ||
-            permissions.branch_list ||
-            permissions.branch_create ||
-            permissions.role_list ||
-            permissions.role_create ||
-            permissions.permission_list ||
-            permissions.permission_create
+            userPermissions.brand_list ||
+            userPermissions.brand_create ||
+            userPermissions.branch_list ||
+            userPermissions.branch_create ||
+            userPermissions.role_list ||
+            userPermissions.role_create ||
+            userPermissions.permission_list ||
+            userPermissions.permission_create
           "
         >
           <!-- List Group Icon-->
@@ -114,7 +114,7 @@
               <v-list-item-title>Branch</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-          <v-list-item link to="/role/index" v-if="permissions.role_list">
+          <v-list-item link to="/role/index" v-if="userPermissions.role_list">
             <v-list-item-content>
               <v-list-item-title>Role</v-list-item-title>
             </v-list-item-content>
@@ -122,14 +122,14 @@
           <v-list-item
             link
             to="/permission/index"
-            v-if="permissions.permission_list"
+            v-if="userPermissions.permission_list"
           >
             <v-list-item-content>
               <v-list-item-title>Permission</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list-group>
-        <v-list-item link to="/activity_logs" v-if="permissions.activity_logs">
+        <v-list-item link to="/activity_logs" v-if="userPermissions.activity_logs">
           <v-list-item-icon>
             <v-icon>mdi-history</v-icon>
           </v-list-item-icon>
@@ -151,8 +151,8 @@
 </template>
 
 <script>
-
 import axios from "axios";
+import { mapState, mapActions } from "vuex";
 
 export default {
   data() {
@@ -163,61 +163,11 @@ export default {
       mini: false,
       right: null,
       selectedItem: 1,
-      user: null,
       loading: null,
-      initiated: false,
-      permissions: {
-        user_list: false,
-        user_create: false,
-        user_edit: false,
-        user_delete: false,
-        brand_list: false,
-        brand_create: false,
-        brand_edit: false,
-        brand_delete: false,
-        branch_list: false,
-        branch_create: false,
-        branch_edit: false,
-        branch_delete: false,
-        product_list: false,
-        product_create: false,
-        product_edit: false,
-        product_delete: false,
-        product_export: false,
-        role_list: false,
-        role_create: false,
-        role_edit: false,
-        role_delete: false,
-        permission_list: false,
-        permission_create: false,
-        permission_edit: false,
-        permission_delete: false,
-        activity_logs: false,
-      },
-      roles: {
-        administrator: false,
-      },
-      user_permissions: [],
-      user_roles: [],
     };
   },
 
   methods: {
-    getUser() {
-      axios.get("/api/auth/init").then(
-        (response) => {
-          // console.log(response.data);
-          this.user = response.data.user.name;
-        },
-        (error) => {
-          // if unauthenticated (401)
-          if (error.response.status == "401") {
-            localStorage.removeItem("access_token");
-            this.$router.push({ name: "login" });
-          }
-        }
-      );
-    },
     logout() {
       this.overlay = true;
       axios.get("/api/auth/logout").then(
@@ -240,58 +190,6 @@ export default {
         }
       );
     },
-    userRolesPermissions() {
-      axios.get("/api/user/roles_permissions").then((response) => {
-        this.user_permissions = response.data.user_permissions;
-        this.user_roles = response.data.user_roles;
-        this.getRolesPermissions();
-      });
-    },
-
-    getRolesPermissions() {
-      this.permissions.user_list = this.hasPermission(["user-list"]);
-      this.permissions.user_create = this.hasPermission(["user-create"]);
-      this.permissions.user_edit = this.hasPermission(["user-edit"]);
-      this.permissions.user_delete = this.hasPermission(["user-delete"]);
-      this.permissions.permission_list = this.hasPermission([
-        "permission-list",
-      ]);
-      this.permissions.permission_create = this.hasPermission([
-        "permission-create",
-      ]);
-      this.permissions.permission_edit = this.hasPermission([
-        "permission-edit",
-      ]);
-      this.permissions.permission_delete = this.hasPermission([
-        "permission-delete",
-      ]);
-      this.permissions.role_list = this.hasPermission(["role-list"]);
-      this.permissions.role_create = this.hasPermission(["role-create"]);
-      this.permissions.role_edit = this.hasPermission(["role-edit"]);
-      this.permissions.role_delete = this.hasPermission(["role-delete"]);
-      this.permissions.activity_logs = this.hasPermission(["activity-logs"]);
-      this.roles.administrator = this.hasRole(["Administrator"]);
-    },
-
-    hasRole(roles) {
-      let hasRole = false;
-
-      roles.forEach((value, index) => {
-        hasRole = this.user_roles.includes(value);
-      });
-
-      return hasRole;
-    },
-
-    hasPermission(permissions) {
-      let hasPermission = false;
-
-      permissions.forEach((value, index) => {
-        hasPermission = this.user_permissions.includes(value);
-      });
-
-      return hasPermission;
-    },
 
     websocket() {
       // Socket.IO fetch data
@@ -307,6 +205,13 @@ export default {
         }
       };
     },
+    ...mapActions("auth", ["getUser"]),
+    ...mapActions("userRolesPermissions", ["userRolesPermissions"]),
+  },
+
+  computed: {
+    ...mapState("auth", ["user"]),
+    ...mapState("userRolesPermissions", ["userRoles", "userPermissions"]),
   },
 
   mounted() {

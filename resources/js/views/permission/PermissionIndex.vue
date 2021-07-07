@@ -115,12 +115,9 @@
 import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
-import Home from "../Home.vue";
+import { mapState } from 'vuex';
 
 export default {
-  components: {
-    Home,
-  },
 
   mixins: [validationMixin],
 
@@ -139,7 +136,6 @@ export default {
       disabled: false,
       dialog: false,
       permissions: [],
-      userPermissions: Home.data().permissions,
       editedIndex: -1,
       editedPermission: {
         name: "",
@@ -159,8 +155,7 @@ export default {
         },
       ],
       loading: true,
-      user_permissions: [],
-      user_roles: [],
+
     };
   },
 
@@ -191,7 +186,7 @@ export default {
         (response) => {
           if (response.data.success) {
             // send data to Sockot.IO Server
-            // this.$socket.emit("sendData", { action: "permission-delete" });
+            this.$socket.emit("sendData", { action: "permission-delete" });
           }
           this.loading = false;
         },
@@ -269,7 +264,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                // this.$socket.emit("sendData", { action: "permission-edit" });
+                this.$socket.emit("sendData", { action: "permission-edit" });
 
                 Object.assign(
                   this.permissions[this.editedIndex],
@@ -278,9 +273,6 @@ export default {
                 this.showAlert();
                 this.close();
 
-                this.user_permissions = response.data.user_permissions;
-                this.user_roles = response.data.user_roles;
-                this.getRolesPermissions();
               }
 
               this.disabled = false;
@@ -297,7 +289,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                // this.$socket.emit("sendData", { action: "permission-create" });
+                this.$socket.emit("sendData", { action: "permission-create" });
 
                 this.showAlert();
                 this.close();
@@ -320,86 +312,17 @@ export default {
       this.$v.$reset();
       this.editedPermission.name = "";
     },
-    userRolesPermissions() {
-      axios.get("api/user/roles_permissions").then((response) => {
-        this.user_permissions = response.data.user_permissions;
-        this.user_roles = response.data.user_roles;
-        this.getRolesPermissions();
-      });
-    },
-
     isUnauthorized(error) {
       // if unauthenticated (401)
       if (error.response.status == "401") {
         this.$router.push({ name: "unauthorize" });
       }
-    },
-
-    getRolesPermissions() {
-      this.userPermissions.permission_list = this.hasPermission([
-        "permission-list",
-      ]);
-      this.userPermissions.permission_create = this.hasPermission([
-        "permission-create",
-      ]);
-      this.userPermissions.permission_edit = this.hasPermission([
-        "permission-edit",
-      ]);
-      this.userPermissions.permission_delete = this.hasPermission([
-        "permission-delete",
-      ]);
-
-      // hide column actions if user has no permission
-      if (
-        !this.userPermissions.permission_edit &&
-        !this.userPermissions.permission_delete
-      ) {
-        this.headers[1].align = " d-none";
-      } else {
-        this.headers[1].align = "";
-      }
-
-      // if user is not authorize
-      if (
-        !this.userPermissions.permission_list &&
-        !this.userPermissions.permission_create
-      ) {
-        this.$router.push("/unauthorize").catch(() => {});
-      }
-    },
-    hasRole(roles) {
-      let hasRole = false;
-
-      roles.forEach((value, index) => {
-        hasRole = this.user_roles.includes(value);
-      });
-
-      return hasRole;
-    },
-
-    hasPermission(permissions) {
-      let hasPermission = false;
-
-      permissions.forEach((value, index) => {
-        hasPermission = this.user_permissions.includes(value);
-      });
-
-      return hasPermission;
-    },
+    }, 
     websocket() {
       // Socket.IO fetch data
       this.$options.sockets.sendData = (data) => {
         let action = data.action;
-        if (
-          action == "user-edit" ||
-          action == "role-edit" ||
-          action == "role-delete" ||
-          action == "permission-create" ||
-          action == "permission-delete"
-        ) {
-          this.userRolesPermissions();
-        }
-
+      
         if (
           action == "permission-create" ||
           action == "permission-edit" ||
@@ -421,12 +344,12 @@ export default {
         errors.push("Permission is required.");
       return errors;
     },
+    ...mapState("userRolesPermissions", ["userRoles", "userPermissions"]),
   },
   mounted() {
     axios.defaults.headers.common["Authorization"] =
       "Bearer " + localStorage.getItem("access_token");
     this.getPermission();
-    this.userRolesPermissions();
     // this.websocket();
   },
 };
