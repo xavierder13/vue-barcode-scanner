@@ -64,12 +64,13 @@ class ProductController extends Controller
     {
   
         $rules = [
-            'products.*.branch_id.required' => 'Branch is required',
+            'products.*.branch_id.required' => 'This field is required',
             'products.*.branch_id.integer' => 'Branch must be an integer',
-            'products.*.brand_id.required' => 'Brand is required',
+            'products.*.brand_id.required' => 'This field is required',
             'products.*.brand_id.integer' => 'Brand must be an integer',
-            'products.*.model.required' => 'Model is required',
-            'products.*.serial.required' => 'Serial Number is required',
+            'products.*.model.required' => 'This field is required',
+            'products.*.serial.required' => 'This field is required',
+            'products.required' => 'Please enter product details'
         ];
 
         $valid_fields = [
@@ -77,6 +78,7 @@ class ProductController extends Controller
             'products.*.brand_id' => 'required|integer',
             'products.*.model' => 'required',
             'products.*.serial' => 'required',
+            'products' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $valid_fields, $rules);

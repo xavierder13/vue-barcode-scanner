@@ -2,8 +2,7 @@ import axios from 'axios';
 import router from '../../router';
 
 const state = {
-  user_name: "",
-  user_branch_id: "",
+  user: "",
 };
 
 const getters = {};
@@ -13,6 +12,7 @@ const actions = {
     axios.get("/api/auth/init").then(
       (response) => {
         commit('setUser', response.data.user);
+        
       },
       (error) => {
         // if unauthenticated (401)
@@ -27,8 +27,7 @@ const actions = {
 
 const mutations = {
   setUser(state, data) {
-    state.user_name = data.name;
-    state.user_branch_id = data.branch_id;
+    state.user = data;
   }
 };
 

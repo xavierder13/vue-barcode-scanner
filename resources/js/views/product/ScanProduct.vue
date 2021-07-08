@@ -37,7 +37,7 @@
             <v-row v-if="switch1">
               <!-- if switch1 is true (Multiple Scan) -->
               <v-col>
-                <v-simple-table>
+                <v-simple-table dense>
                   <thead>
                     <tr>
                       <th>Serial</th>
@@ -51,6 +51,7 @@
                     <tr v-for="(field, index) in products" :key="index">
                       <td>
                         <v-text-field
+                          dense
                           name="serial"
                           v-model="field.serial"
                           readonly
@@ -58,6 +59,7 @@
                       </td>
                       <td>
                         <v-text-field
+                          dense
                           name="model"
                           v-model="field.model"
                           :error-messages="errorFields[index]['model']"
@@ -67,12 +69,13 @@
                       </td>
                       <td>
                         <v-autocomplete
+                          dense
                           v-model="field.brand_id"
                           :items="brands"
                           item-text="name"
                           item-value="id"
                           :error-messages="errorFields[index]['brand_id']"
-                          @keyup="
+                          @change="
                             getFieldValue(index, 'brand_id', field.brand_id)
                           "
                           @blur="
@@ -83,12 +86,13 @@
                       </td>
                       <td v-if="user.id === 1">
                         <v-autocomplete
+                          dense
                           v-model="field.branch_id"
                           :items="branches"
                           item-text="name"
                           item-value="id"
                           :error-messages="errorFields[index]['branch_id']"
-                          @keyup="
+                          @change="
                             getFieldValue(index, 'branch_id', field.branch_id)
                           "
                           @blur="
@@ -100,10 +104,10 @@
                       </td>
                       <td>
                         <v-btn
-                          class="mx-2"
+                          dense
                           fab
                           dark
-                          small
+                          x-small
                           color="red"
                           @click="removeRow(field)"
                         >
@@ -113,6 +117,13 @@
                     </tr>
                   </tbody>
                 </v-simple-table>
+              </v-col>
+            </v-row>
+            <v-row v-if="productsEmpty">
+              <v-col>
+                <span class="v-messages error--text"
+                  >Please enter products</span
+                >
               </v-col>
             </v-row>
             <v-container>
@@ -185,7 +196,7 @@
           <v-card-actions>
             <v-btn
               color="primary"
-              @click="save"
+              @click="save()"
               :disabled="disabled"
               class="ml-4 mb-4 mr-1"
             >
@@ -201,7 +212,6 @@
   </div>
 </template>
 <script>
-
 import axios from "axios";
 import { validationMixin } from "vuelidate";
 import {
@@ -211,9 +221,9 @@ import {
   minLength,
   sameAs,
 } from "vuelidate/lib/validators";
+import { mapState } from "vuex";
 
 export default {
-
   mixins: [validationMixin],
 
   validations: {
@@ -257,10 +267,11 @@ export default {
       },
       brands: [],
       branches: [],
-      user: "",
       products: [],
       errorFields: [],
       switch1: false,
+      productsEmpty: false,
+      productsHasError: false,
     };
   },
 
@@ -271,7 +282,6 @@ export default {
           this.brands = response.data.brands;
           this.branches = response.data.branches;
           this.editedItem.branch_id = response.data.user.branch_id;
-          this.user = response.data.user;
         },
         (error) => {
           this.isUnauthorized(error);
@@ -288,28 +298,27 @@ export default {
       });
     },
 
-    save() {
-      // this.$v.$touch();
-
+    async save() {
+      
       // if scanMode is Normal Mode
       if (!this.switch1) {
         this.$v.$touch();
+        await this.products.push(this.editedItem);
       }
 
-      if (this.products.length || !this.$v.$error) {
+      this.productsEmpty = await this.products.length ? false : true;
+      
+      await this.validateProductFields();
+
+      if (!this.$v.$error && !this.productsEmpty && !this.productsHasError) {
         this.disabled = true;
         this.overlay = true;
 
-        // scan mode normal
-        if (!this.switch1) {
-          this.$v.$touch();
-          this.products.push(this.editedItem);
-        }
-
         const data = { products: this.products };
-
+        
         axios.post("/api/product/store", data).then(
           (response) => {
+ 
             if (response.data.success) {
               // send data to Sockot.IO Server
               // this.$socket.emit("sendData", { action: "product-create" });
@@ -319,17 +328,20 @@ export default {
             } else {
               const object_names = Object.keys(response.data);
 
-              // get the indexes of validated existing code names
-              for (let [key, val] of object_names.entries()) {
-                let object = val.split(".");
-                let object_index = object[1];
-                let object_name = object[2];
+              // if products array has value
+              if (this.products.length) {
+                // get the indexes of validated existing code names
+                for (let [key, val] of object_names.entries()) {
+                  let object = val.split(".");
+                  let object_index = object[1];
+                  let object_name = object[2];
 
-                this.errorFields[object_index][object_name] =
-                  response.data[val];
+                  this.errorFields[object_index][object_name] =
+                    response.data[val];
+                }
+              } else {
+                this.productsEmpty = true;
               }
-
-              console.log(this.errorFields);
             }
             this.overlay = false;
             this.disabled = false;
@@ -347,27 +359,35 @@ export default {
       this.$v.$reset();
       this.editedItem = Object.assign({}, this.defaultItem);
       this.products = [];
+      this.productsEmpty = false;
+      this.productsHasError = false; 
     },
 
     getFieldValue(index, fieldName, value) {
       let fieldValue = value;
 
-      if (
-        (fieldName == "is_multiple" || fieldName == "to_diagnose") &&
-        !fieldValue
-      ) {
-        fieldValue = "N";
-      }
-
       this.products[index][fieldName] = fieldValue;
+      this.errorFields[index][fieldName] = fieldValue
+        ? ""
+        : "This field is required";
+    },
 
-      // assign error message
-      if (!fieldValue) {
-        this.errorFields[index][fieldName] =
-          fieldName.toUpperCase() + " is required";
-      } else {
-        this.errorFields[index][fieldName] = "";
-      }
+    validateProductFields() {
+      this.productsHasError = false;
+
+      this.products.forEach((value, index) => {
+        let fields = Object.keys(value);
+        fields.forEach((val, i) => {
+          // if field is empty
+          if(!this.products[index][val])
+          {
+            this.productsHasError = true;
+            this.errorFields[index][val] = "This field is required";
+          }
+          
+        })
+      });
+
     },
 
     removeRow(item) {
@@ -386,8 +406,6 @@ export default {
 
     // Create callback function to receive barcode when the scanner is already done
     onBarcodeScanned(barcode) {
-      console.log(barcode);
-
       if (this.switch1) {
         this.products.push({
           brand_id: "",
@@ -397,28 +415,14 @@ export default {
         });
 
         this.errorFields.push({
-          brand: "",
+          brand_id: "",
           model: "",
           serial: "",
-          branch: "",
+          branch_id: "",
         });
       } else {
         this.editedItem.serial = barcode;
       }
-
-      // if (this.products.length) {
-      //   for (let [index, val] of this.products.entries()) {
-      //     let fieldNames = Object.keys(val);
-
-      //     for (let [key, fieldName] of fieldNames.entries()) {
-      //       if (!this.products[index][fieldName]) {
-      //         this.errorFields[index][fieldName] =
-      //           fieldName.toUpperCase() + " is required";
-      //         // this.tableProcedureHasError = true;
-      //       }
-      //     }
-      //   }
-      // }
 
       // do something...
     },
@@ -462,6 +466,7 @@ export default {
         return " Normal Mode";
       }
     },
+    ...mapState("auth", ["user"]),
   },
   created() {
     // Add barcode scan listener and pass the callback function
@@ -476,7 +481,7 @@ export default {
       "Bearer " + localStorage.getItem("access_token");
     this.getBrand();
     this.$barcodeScanner.init(this.onBarcodeScanned);
-
+  
   },
 };
 </script>

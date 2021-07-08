@@ -23,7 +23,7 @@
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title>Inventory</v-list-item-title>
-            <v-list-item-subtitle>{{ user }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
