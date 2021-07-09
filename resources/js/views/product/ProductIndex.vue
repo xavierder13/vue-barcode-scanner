@@ -24,6 +24,17 @@
               single-line
               hide-details
             ></v-text-field>
+            <v-spacer></v-spacer>
+            <v-autocomplete
+              v-model="search_branch"
+              :items="branches"
+              item-text="name"
+              item-value="id"
+              label="Search Branch"
+              hide-details=""
+              v-if="user"
+            >
+            </v-autocomplete>
             <template>
               <v-toolbar flat>
                 <v-spacer></v-spacer>
@@ -128,7 +139,7 @@
           </v-card-title>
           <v-data-table
             :headers="headers"
-            :items="products"
+            :items="filteredProducts"
             :search="search"
             :loading="loading"
             loading-text="Loading... Please wait"
@@ -228,6 +239,7 @@ export default {
       ],
       loading: true,
       user: "",
+      search_branch: ""
     };
   },
 
@@ -236,11 +248,12 @@ export default {
       this.loading = true;
       axios.get("/api/product/index").then(
         (response) => {
+          this.user = response.data.user;
           this.products = response.data.products;
           this.brands = response.data.brands;
           this.branches = response.data.branches;
-          this.editedItem.branch_id = response.data.user.branch_id;
-          this.user = response.data.user;
+          this.editedItem.branch_id = this.user.branch_id;
+          this.search_branch = this.user.branch_id;
           this.loading = false;
          
         },
@@ -457,6 +470,18 @@ export default {
       !this.$v.editedItem.branch_id.required &&
         errors.push("Branch is required.");
       return errors;
+    },
+    filteredProducts() {
+      let products = [];
+
+      this.products.forEach(value => {
+        if(value.branch_id === this.search_branch)
+        {
+          products.push(value);
+        }
+      });
+      
+      return products;
     },
     ...mapState("userRolesPermissions", ["userRoles", "userPermissions"]),
   },
