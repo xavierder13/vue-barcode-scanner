@@ -18,7 +18,6 @@
               append-icon="mdi-magnify"
               label="Search"
               single-line
-              hide-details
               v-if="userPermissions.permission_list"
             ></v-text-field>
             <template>
@@ -264,7 +263,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "permission-edit" });
+                // this.$socket.emit("sendData", { action: "permission-edit" });
 
                 Object.assign(
                   this.permissions[this.editedIndex],

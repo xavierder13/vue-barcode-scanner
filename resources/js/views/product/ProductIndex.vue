@@ -12,7 +12,12 @@
         <v-card>
           <v-card-title>
             Product Lists
-            <v-btn color="success" class="ml-4" small @click="exportData()" v-if="userPermissions.product_export"
+            <v-btn
+              color="success"
+              class="ml-4"
+              small
+              @click="exportData()"
+              v-if="userPermissions.product_export"
               ><v-icon class="mr-1" small> mdi-microsoft-excel </v-icon
               >Export</v-btn
             >
@@ -22,7 +27,6 @@
               append-icon="mdi-magnify"
               label="Search"
               single-line
-              hide-details
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-autocomplete
@@ -30,11 +34,18 @@
               :items="branches"
               item-text="name"
               item-value="id"
-              label="Search Branch"
-              hide-details=""
-              v-if="user"
+              label="Branch"
+              v-if="user.id === 1"
             >
             </v-autocomplete>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="error"
+              small
+              @click="clearList()"
+              v-if="userPermissions.product_clear_list"
+              >clear list</v-btn
+            >
             <template>
               <v-toolbar flat>
                 <v-spacer></v-spacer>
@@ -177,14 +188,12 @@
   </div>
 </template>
 <script>
-
 import axios from "axios";
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
-
   mixins: [validationMixin],
 
   validations: {
@@ -239,7 +248,7 @@ export default {
       ],
       loading: true,
       user: "",
-      search_branch: ""
+      search_branch: "",
     };
   },
 
@@ -255,7 +264,6 @@ export default {
           this.editedItem.branch_id = this.user.branch_id;
           this.search_branch = this.user.branch_id;
           this.loading = false;
-         
         },
         (error) => {
           this.isUnauthorized(error);
@@ -394,6 +402,71 @@ export default {
       }
     },
 
+    clearList() {
+      if (this.filteredProducts.length) {
+        this.$swal({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: "Clear List!",
+        }).then((result) => {
+          // <--
+
+          if (result.value) {
+            // <-- if confirmed
+
+            let data = { branch_id: this.search_branch, clear_list: true };
+
+            axios.post("api/product/delete", data).then(
+              (response) => {
+                if (response.data.success) {
+                  // send data to Sockot.IO Server
+                  // this.$socket.emit("sendData", { action: "product-create" });
+
+                  this.products.forEach((value, index) => {
+                    if (value.branch_id === this.search_branch) {
+                      let i = this.products.indexOf(value);
+                      this.products.splice(i, 1);
+                    }
+                  });
+
+                  this.$swal({
+                    position: "center",
+                    icon: "success",
+                    title: "Record has been cleared",
+                    showConfirmButton: false,
+                    timer: 2500,
+                  });
+                } else {
+                  this.$swal({
+                    position: "center",
+                    icon: "warning",
+                    title: "No record found",
+                    showConfirmButton: false,
+                    timer: 2500,
+                  });
+                }
+              },
+              (error) => {
+                this.isUnauthorized(error);
+              }
+            );
+          }
+        });
+      } else {
+        this.$swal({
+          position: "center",
+          icon: "warning",
+          title: "No record found",
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      }
+    },
+
     clear() {
       this.$v.$reset();
       this.editedItem = Object.assign({}, this.defaultItem);
@@ -406,11 +479,9 @@ export default {
         this.$router.push({ name: "unauthorize" });
       }
     },
-    exportData()
-    {
+    exportData() {
       window.open(
-        location.origin +
-          "/api/product/export/" + this.user.branch_id,
+        location.origin + "/api/product/export/" + this.user.branch_id,
         "_blank"
       );
     },
@@ -419,7 +490,7 @@ export default {
       // Socket.IO fetch data
       this.$options.sockets.sendData = (data) => {
         let action = data.action;
-        
+
         if (
           action == "product-create" ||
           action == "product-edit" ||
@@ -474,13 +545,12 @@ export default {
     filteredProducts() {
       let products = [];
 
-      this.products.forEach(value => {
-        if(value.branch_id === this.search_branch)
-        {
+      this.products.forEach((value) => {
+        if (value.branch_id === this.search_branch) {
           products.push(value);
         }
       });
-      
+
       return products;
     },
     ...mapState("userRolesPermissions", ["userRoles", "userPermissions"]),

@@ -176,16 +176,36 @@ class ProductController extends Controller
     }
 
     public function delete(Request $request)
-    {
-        $product = Product::find($request->get('product_id'));
-
-        //if record is empty then display error page
-        if(empty($product->id))
+    {   
+        
+        if($request->get('clear_list'))
         {
-            return abort(404, 'Not Found');
+            $products = DB::table('products')->where('branch_id', '=', $request->get('branch_id'));
+            
+            if(!$products->count('id'))
+            {
+                return response()->json('No record found', 200);
+            }
+            else
+            {
+                $products->delete();
+            }
+
+        }
+        else
+        {
+            
+            $product = Product::find($request->get('product_id'));
+
+            //if record is empty then display error page
+            if(empty($product->id))
+            {
+                return abort(404, 'Not Found');
+            }
+
+            $product->delete();
         }
 
-        $product->delete();
 
         return response()->json(['success' => 'Record has been deleted'], 200);
     }

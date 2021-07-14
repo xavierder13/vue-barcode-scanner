@@ -30,6 +30,7 @@ class PermissionSeeder extends Seeder
             'product-create',
             'product-edit',
             'product-delete',
+            'product-clear-list',
             'permission-list',
             'permission-create',
             'permission-edit',

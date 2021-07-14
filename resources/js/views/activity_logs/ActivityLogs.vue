@@ -26,9 +26,9 @@
               append-icon="mdi-magnify"
               label="Search"
               single-line
-              hide-details
               v-if="userPermissions.user_list"
             ></v-text-field>
+            <v-spacer></v-spacer>
           </v-card-title>
           <v-data-table
             :headers="headers"
