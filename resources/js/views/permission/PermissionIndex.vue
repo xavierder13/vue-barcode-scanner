@@ -288,7 +288,7 @@ export default {
             (response) => {
               if (response.data.success) {
                 // send data to Sockot.IO Server
-                this.$socket.emit("sendData", { action: "permission-create" });
+                // this.$socket.emit("sendData", { action: "permission-create" });
 
                 this.showAlert();
                 this.close();
