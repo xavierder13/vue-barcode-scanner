@@ -77,6 +77,7 @@ const mutations = {
     state.userPermissions.product_create = permissions.includes("product-create");;
     state.userPermissions.product_edit = permissions.includes("product-edit");
     state.userPermissions.product_delete = permissions.includes("product-delete");
+    state.userPermissions.product_export = permissions.includes("product-export");
     state.userPermissions.product_clear_list = permissions.includes("product-clear-list");
     state.userPermissions.permission_list = permissions.includes("permission-list");
     state.userPermissions.permission_create = permissions.includes("permission-create");

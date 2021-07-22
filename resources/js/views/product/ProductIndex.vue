@@ -9,9 +9,8 @@
             </v-breadcrumbs-item>
           </template>
         </v-breadcrumbs> -->
-        <v-card>
-          <v-card-title>
-            Product Lists
+        <div class="d-flex justify-content-end mb-3">
+          <div>
             <v-btn
               color="success"
               class="ml-4"
@@ -21,6 +20,22 @@
               ><v-icon class="mr-1" small> mdi-microsoft-excel </v-icon
               >Export</v-btn
             >
+          </div>
+          <div><v-divider vertical class="ml-2 mr-2"></v-divider></div>
+          <div>
+            <v-btn
+              color="error"
+              small
+              @click="clearList()"
+              v-if="userPermissions.product_clear_list"
+              ><v-icon class="mr-1" small> mdi-delete </v-icon>clear
+              list</v-btn
+            >
+          </div>
+        </div>
+        <v-card>
+          <v-card-title>
+            Product Lists
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
@@ -39,13 +54,6 @@
             >
             </v-autocomplete>
             <v-spacer></v-spacer>
-            <v-btn
-              color="error"
-              small
-              @click="clearList()"
-              v-if="userPermissions.product_clear_list"
-              >clear list</v-btn
-            >
             <template>
               <v-toolbar flat>
                 <v-spacer></v-spacer>
@@ -480,10 +488,20 @@ export default {
       }
     },
     exportData() {
-      window.open(
-        location.origin + "/api/product/export/" + this.user.branch_id,
-        "_blank"
-      );
+      if (this.filteredProducts.length) {
+        window.open(
+          location.origin + "/api/product/export/" + this.user.branch_id,
+          "_blank"
+        );
+      } else {
+        this.$swal({
+          position: "center",
+          icon: "warning",
+          title: "No record found",
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      }
     },
 
     websocket() {
