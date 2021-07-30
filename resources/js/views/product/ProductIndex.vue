@@ -21,15 +21,20 @@
               >Export</v-btn
             >
           </div>
-          <div><v-divider vertical class="ml-2 mr-2"></v-divider></div>
+          <div>
+            <v-divider
+              vertical
+              class="ml-2 mr-2"
+              v-if="userPermissions.product_clear_list"
+            ></v-divider>
+          </div>
           <div>
             <v-btn
               color="error"
               small
               @click="clearList()"
               v-if="userPermissions.product_clear_list"
-              ><v-icon class="mr-1" small> mdi-delete </v-icon>clear
-              list</v-btn
+              ><v-icon class="mr-1" small> mdi-delete </v-icon>clear list</v-btn
             >
           </div>
         </div>
