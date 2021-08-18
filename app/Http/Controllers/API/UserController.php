@@ -89,11 +89,7 @@ class UserController extends Controller
     public function edit($user_id)
     {
         $user = User::find($user_id);
-        $service_signatories = DB::table('service_signatories')
-                                ->join('services', 'service_signatories.serviceid', '=', 'services.id')
-                                ->select(DB::raw('services.*'))
-                                ->where('userid', $user_id)
-                                ->get();
+
         //if record is empty then display error page
         if(empty($user->id))
         {
@@ -104,7 +100,6 @@ class UserController extends Controller
         
         return response()->json([
             'user' => $user,
-            'service_signatories' => $service_signatories
         ], 200);
 
     }
