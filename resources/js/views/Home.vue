@@ -150,6 +150,10 @@
   </v-app>
 </template>
 
+<style>
+  html { overflow-y: auto } /* show scrollbar when overflow */
+</style>
+
 <script>
 import axios from "axios";
 import { mapState, mapActions } from "vuex";
