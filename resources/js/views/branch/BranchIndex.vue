@@ -146,7 +146,7 @@ export default {
       headers: [
         { text: "Branch", value: "name" },
         { text: "Branch Code", value: "code" },
-        { text: "Actions", value: "actions", sortable: false },
+        { text: "Actions", value: "actions", sortable: false, width: "80px" },
       ],
       switch1: true,
       disabled: false,

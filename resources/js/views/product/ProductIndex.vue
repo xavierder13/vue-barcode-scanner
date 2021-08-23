@@ -226,7 +226,7 @@ export default {
         { text: "Serial", value: "serial" },
         { text: "Branch", value: "branch" },
         { text: "Date Created", value: "date_created" },
-        { text: "Actions", value: "actions", sortable: false },
+        { text: "Actions", value: "actions", sortable: false, width: "80px" },
       ],
       disabled: false,
       dialog: false,
