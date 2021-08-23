@@ -147,6 +147,12 @@
     </v-overlay>
     <!-- Content -->
     <router-view />
+    <v-footer padless dense dark app>
+      <v-col class="text-center" cols="12">
+        Copyright © {{ new Date().getFullYear() }} —
+        <strong> LARAVEL VUE BARCODE SCANNER</strong>
+      </v-col>
+    </v-footer>
   </v-app>
 </template>
 
